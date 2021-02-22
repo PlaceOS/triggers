@@ -109,6 +109,10 @@ shards:
     git: https://github.com/place-labs/log-backend.git
     version: 0.3.0
 
+  placeos-log-backend:
+    git: https://github.com/placeos/log-backend.git
+    version: 0.1.0
+
   placeos-models:
     git: https://github.com/placeos/models.git
     version: 4.15.2
