@@ -9,7 +9,7 @@ before_install:
   - docker run --net="host" -p "29015:29015" -p "28015:28015" -d rethinkdb:2.4
 
 install:
-  - shards install
+  - shards install --ignore-crystal-version
 
 script:
   - crystal spec -v --error-trace
