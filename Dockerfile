@@ -1,4 +1,4 @@
-FROM crystallang/crystal:0.36.1-alpine
+FROM crystallang/crystal:1.0.0-alpine
 
 WORKDIR /app
 
@@ -7,10 +7,9 @@ RUN apk update && apk add --no-cache ca-certificates tzdata && update-ca-certifi
 
 # Install shards for caching
 COPY shard.yml shard.yml
-COPY shard.override.yml shard.override.yml
 COPY shard.lock shard.lock
 
-RUN shards install --production
+RUN shards install --production --ignore-crystal-version
 
 # Add src
 COPY ./src /app/src
