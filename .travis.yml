@@ -1,3 +1,2 @@
-language: crystal
 services: docker
 script: ./test
