@@ -7,7 +7,7 @@ shards:
 
   action-controller:
     git: https://github.com/spider-gazelle/action-controller.git
-    version: 4.3.0
+    version: 4.3.3
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
@@ -15,7 +15,7 @@ shards:
 
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
-    version: 0.14.1
+    version: 0.14.2
 
   bindata:
     git: https://github.com/spider-gazelle/bindata.git
@@ -35,7 +35,7 @@ shards:
 
   cron_parser:
     git: https://github.com/kostya/cron_parser.git
-    version: 0.3.0
+    version: 0.4.0
 
   db:
     git: https://github.com/crystal-lang/crystal-db.git
@@ -51,7 +51,7 @@ shards:
 
   etcd:
     git: https://github.com/place-labs/crystal-etcd.git
-    version: 1.1.2
+    version: 1.2.2
 
   future:
     git: https://github.com/crystal-community/future.cr.git
@@ -63,7 +63,7 @@ shards:
 
   hound-dog:
     git: https://github.com/place-labs/hound-dog.git
-    version: 2.6.1
+    version: 2.8.0
 
   http-params-serializable:
     git: https://github.com/caspiano/http-params-serializable.git
@@ -109,13 +109,9 @@ shards:
     git: https://github.com/place-labs/log-backend.git
     version: 0.3.0
 
-  placeos-log-backend:
-    git: https://github.com/placeos/log-backend.git
-    version: 0.1.0
-
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 4.15.2
+    version: 4.15.3
 
   pool:
     git: https://github.com/ysbaddaden/pool.git

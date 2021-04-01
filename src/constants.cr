@@ -1,12 +1,11 @@
 require "secrets-env"
-require "placeos-log-backend"
 
 module App
   NAME    = "triggers"
   VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
 
   Log         = ::Log.for(NAME)
-  ENVIRONMENT = ENV["SG_ENV"]? || "development"
+  ENVIRONMENT = ENV["SG_ENV"]?.presence || "development"
 
   DEFAULT_PORT          = (ENV["SG_SERVER_PORT"]? || 3000).to_i
   DEFAULT_HOST          = ENV["SG_SERVER_HOST"]? || "127.0.0.1"
@@ -27,12 +26,6 @@ module App
   CORE_NAMESPACE = "core"
 
   class_getter discovery : HoundDog::Discovery { HoundDog::Discovery.new(CORE_NAMESPACE) }
-
-  def self.smtp_authenticated?
-    !SMTP_USER.empty?
-  end
-
-  def self.running_in_production?
-    ENVIRONMENT == "production"
-  end
+  class_getter? smtp_authenticated : Bool = !SMTP_USER.empty?
+  class_getter? production : Bool = ENVIRONMENT.downcase == "production"
 end
