@@ -20,7 +20,7 @@ dependencies:
 
   # Log Backend
   placeos-log-backend:
-    github: placeos/log-backend
+    github: place-labs/log-backend
 
   # Tagged logging
   log_helper:

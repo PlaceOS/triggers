@@ -1,9 +1,13 @@
 require "./helper"
+require "placeos-driver/storage"
+require "placeos-driver/subscriptions"
+require "placeos-driver/proxy/subscriptions"
+require "placeos-driver/proxy/remote_driver"
 
 module PlaceOS::Model
   describe Trigger do
     Spec.after_suite {
-      store = PlaceOS::Driver::RedisStorage.new("mod-1234")
+      store = ::PlaceOS::Driver::RedisStorage.new("mod-1234")
       store.clear
     }
 
@@ -24,9 +28,6 @@ module PlaceOS::Model
 
       inst = Generator.trigger_instance(trigger).save!
 
-      # allow time for the database to propagate the config
-      sleep 0.1
-
       # create the status lookup structure
       sys_id = inst.control_system_id.not_nil!
       storage = PlaceOS::Driver::RedisStorage.new(sys_id, "system")
@@ -39,7 +40,7 @@ module PlaceOS::Model
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
       # Ensure the trigger hasn't fired
-      state = ::LOADER.instances[inst.id]
+      state = LOADER.instances[inst.id]
       state.triggered.should be_false
 
       store = PlaceOS::Driver::RedisStorage.new("mod-1234")

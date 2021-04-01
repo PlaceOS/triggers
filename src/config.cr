@@ -1,3 +1,5 @@
+require "./logging"
+
 # Application dependencies
 require "email"
 require "active-model"
@@ -23,7 +25,7 @@ keeps_headers = ["X-Request-ID"]
 
 # Add handlers that should run before your application
 ActionController::Server.before(
-  ActionController::ErrorHandler.new(App.running_in_production?, keeps_headers),
+  ActionController::ErrorHandler.new(App.production?, keeps_headers),
   ActionController::LogHandler.new(filter_params, ms: true),
 )
 
