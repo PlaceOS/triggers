@@ -48,9 +48,9 @@ OptionParser.parse(ARGV.dup) do |parser|
 end
 
 # Load the routes
-puts "Launching #{App::NAME} v#{App::VERSION}"
-
 require "./config"
+
+App::Log.info { "launching #{App::NAME} v#{App::VERSION}" }
 
 server = ActionController::Server.new(port, host)
 
@@ -87,8 +87,8 @@ Signal::USR2.trap &logging
 
 # Start the server
 server.run do
-  puts "Listening on #{server.print_addresses}"
+  App::Log.info { "listening on #{server.print_addresses}" }
 end
 
 # Shutdown message
-puts "#{App::NAME} leaps through the veldt\n"
+App::Log.info { "#{App::NAME} leaps through the veldt" }
