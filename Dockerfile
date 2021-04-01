@@ -3,7 +3,7 @@ FROM crystallang/crystal:1.0.0-alpine
 WORKDIR /app
 
 # Add trusted CAs for communicating with external services
-RUN apk update && apk add --no-cache ca-certificates tzdata && update-ca-certificates
+RUN apk add --no-cache ca-certificates tzdata && update-ca-certificates
 
 # Install shards for caching
 COPY shard.yml shard.yml
