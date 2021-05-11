@@ -1,5 +1,5 @@
 name: placeos-triggers
-version: 1.1.3
+version: 1.2.0
 
 targets:
   triggers:
@@ -9,6 +9,17 @@ dependencies:
   # Web server
   action-controller:
     github: spider-gazelle/action-controller
+
+  email:
+    github: arcage/crystal-email
+
+  # Service discovery
+  hound-dog:
+    github: place-labs/hound-dog
+
+  # Tagged logging
+  log_helper:
+    github: spider-gazelle/log_helper
 
   # Driver State
   placeos-driver:
@@ -22,23 +33,22 @@ dependencies:
   placeos-log-backend:
     github: place-labs/log-backend
 
-  # Tagged logging
-  log_helper:
-    github: spider-gazelle/log_helper
+  # Abstraction over changes
+  placeos-resource:
+    github: place-labs/resource
+    version: ~> 2.0
+
+  # Sentry integration
+  raven:
+    github: Sija/raven.cr
+    branch: master
+
+  secrets-env:
+    github: place-labs/secrets-env
 
   # timers / scheduling
   tasker:
     github: spider-gazelle/tasker
-
-  # Service discovery
-  hound-dog:
-    github: place-labs/hound-dog
-
-  email:
-    github: arcage/crystal-email
-
-  secrets-env:
-    github: place-labs/secrets-env
 
 development_dependencies:
   ameba:

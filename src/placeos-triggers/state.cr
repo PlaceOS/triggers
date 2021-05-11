@@ -17,7 +17,7 @@ require "placeos-driver/proxy/remote_driver"
 
 module PlaceOS::Triggers
   class State
-    Log = ::App::Log.for("state")
+    Log = ::PlaceOS::Triggers::Log.for("state")
 
     @@subscriber = PlaceOS::Driver::Subscriptions.new
 
@@ -83,12 +83,8 @@ module PlaceOS::Triggers
         @conditions_met[condition_key] = false
 
         case time.type
-        when PlaceOS::Model::Trigger::Conditions::TimeDependent::Type::At
-          time_at(condition_key, time.time.not_nil!)
-        when PlaceOS::Model::Trigger::Conditions::TimeDependent::Type::Cron
-          time_cron(condition_key, time.cron.not_nil!)
-        else
-          raise "invalid type: #{time.type.inspect}"
+        in .at?   then time_at(condition_key, time.time.not_nil!)
+        in .cron? then time_cron(condition_key, time.cron.not_nil!)
         end
       end
 
@@ -206,7 +202,7 @@ module PlaceOS::Triggers
             system_id,
             modname,
             index,
-            App.discovery
+            PlaceOS::Triggers.discovery
           ).exec(
             PlaceOS::Driver::Proxy::RemoteDriver::Clearance::Admin,
             method,
@@ -293,3 +289,5 @@ module PlaceOS::Triggers
     end
   end
 end
+
+require "./state/comparison"

@@ -1,6 +1,6 @@
 require "secrets-env"
 
-module App
+module PlaceOS::Triggers
   NAME    = "triggers"
   VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
 

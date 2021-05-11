@@ -1,7 +1,7 @@
-require "./state"
+require "../state"
 
 class PlaceOS::Triggers::State::Comparison
-  Log = ::App::Log.for("comparison")
+  Log = ::PlaceOS::Triggers::Log.for("comparison")
 
   def initialize(
     @state : State,
@@ -12,21 +12,17 @@ class PlaceOS::Triggers::State::Comparison
     right : PlaceOS::Model::Trigger::Conditions::Comparison::Value
   )
     @left = case left
-            when PlaceOS::Model::Trigger::Conditions::Comparison::Constant
+            in PlaceOS::Model::Trigger::Conditions::Comparison::Constant
               Constant.new(left)
-            when PlaceOS::Model::Trigger::Conditions::Comparison::StatusVariable
+            in PlaceOS::Model::Trigger::Conditions::Comparison::StatusVariable
               Status.new(left)
-            else
-              raise "unsupported comparison type"
             end
 
     @right = case right
-             when PlaceOS::Model::Trigger::Conditions::Comparison::Constant
+             in PlaceOS::Model::Trigger::Conditions::Comparison::Constant
                Constant.new(right)
-             when PlaceOS::Model::Trigger::Conditions::Comparison::StatusVariable
+             in PlaceOS::Model::Trigger::Conditions::Comparison::StatusVariable
                Status.new(right)
-             else
-               raise "unsupported comparison type"
              end
   end
 

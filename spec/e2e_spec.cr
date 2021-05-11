@@ -1,19 +1,29 @@
 require "./helper"
+
 require "placeos-driver/storage"
 require "placeos-driver/subscriptions"
 require "placeos-driver/proxy/subscriptions"
 require "placeos-driver/proxy/remote_driver"
 
-module PlaceOS::Model
-  describe Trigger do
-    Spec.after_suite {
-      store = ::PlaceOS::Driver::RedisStorage.new("mod-1234")
-      store.clear
-    }
+module PlaceOS::Triggers
+  # Trigger state for the system
+  mappings = Mapping.new
 
+  # Start watching trigger table
+  trigger_loader = Loader::Trigger.new(mappings)
+
+  # Start watching trigger instance table
+  instance_loader = Loader::TriggerInstance.new(mappings)
+
+  Spec.after_suite do
+    store = ::PlaceOS::Driver::RedisStorage.new("mod-1234")
+    store.clear
+  end
+
+  describe "e2e" do
     it "creates a trigger, updates it and checks that exec works" do
-      trigger = Generator.trigger
-      compare = Trigger::Conditions::Comparison.new(
+      trigger = Model::Generator.trigger
+      compare = Model::Trigger::Conditions::Comparison.new(
         left: true,
         operator: "and",
         right: {
@@ -26,7 +36,11 @@ module PlaceOS::Model
       trigger.valid?.should be_true
       trigger.save!
 
-      inst = Generator.trigger_instance(trigger).save!
+      trigger_loader.process_resource(:created, trigger).success?.should be_true
+
+      inst = Model::Generator.trigger_instance(trigger).save!
+
+      instance_loader.process_resource(:created, inst)
 
       # create the status lookup structure
       sys_id = inst.control_system_id.not_nil!
@@ -39,8 +53,9 @@ module PlaceOS::Model
 
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
+
       # Ensure the trigger hasn't fired
-      state = LOADER.instances[inst.id]
+      state = mappings.with_instances &.[inst.id]
       state.triggered.should be_false
 
       store = PlaceOS::Driver::RedisStorage.new("mod-1234")
@@ -51,7 +66,7 @@ module PlaceOS::Model
       # ensure the trigger has fired
       state.triggered.should be_true
 
-      compare2 = Trigger::Conditions::Comparison.new(
+      compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
         operator: "equal",
         right: {
@@ -65,10 +80,12 @@ module PlaceOS::Model
       trigger.conditions_will_change!
       trigger.save!
 
+      trigger_loader.process_resource(:updated, trigger)
+
       sleep 0.1
 
       # The state is replaced with a new state on update
-      state = LOADER.instances[inst.id]
+      state = mappings.with_instances &.[inst.id]
       state.triggered.should be_false
       store[:greeting] = "hello".to_json
 
@@ -76,7 +93,7 @@ module PlaceOS::Model
 
       state.triggered.should be_true
 
-      func = Trigger::Actions::Function.new(
+      func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",
         method: "start"
       )
@@ -96,7 +113,7 @@ module PlaceOS::Model
       trigger.actions_will_change!
       trigger.save!
 
-      sleep 0.1
+      trigger_loader.process_resource(:created, trigger).success?.should be_true
 
       # Check the state in redis
       inst_store = PlaceOS::Driver::RedisStorage.new(inst.id.not_nil!)
@@ -108,10 +125,10 @@ module PlaceOS::Model
     end # it
 
     it "creates two triggers, updates them and checks they works" do
-      system = Generator.control_system.save!
+      system = Model::Generator.control_system.save!
 
-      trigger = Generator.trigger
-      compare = Trigger::Conditions::Comparison.new(
+      trigger = Model::Generator.trigger
+      compare = Model::Trigger::Conditions::Comparison.new(
         left: true,
         operator: "and",
         right: {
@@ -124,8 +141,13 @@ module PlaceOS::Model
       trigger.valid?.should be_true
       trigger.save!
 
-      inst = Generator.trigger_instance(trigger, control_system: system).save!
-      inst2 = Generator.trigger_instance(trigger, control_system: system).save!
+      trigger_loader.process_resource(:created, trigger).success?.should be_true
+
+      inst = Model::Generator.trigger_instance(trigger, control_system: system).save!
+      inst2 = Model::Generator.trigger_instance(trigger, control_system: system).save!
+
+      instance_loader.process_resource(:created, inst).success?.should be_true
+      instance_loader.process_resource(:created, inst2).success?.should be_true
 
       # create the status lookup structure
       sys_id = system.id.not_nil!
@@ -139,10 +161,10 @@ module PlaceOS::Model
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
       # Ensure the trigger hasn't fired
-      state = LOADER.instances[inst.id]
+      state = mappings.with_instances &.[inst.id]
       state.triggered.should be_false
 
-      state2 = LOADER.instances[inst2.id]
+      state2 = mappings.with_instances &.[inst2.id]
       state2.triggered.should be_false
 
       store = PlaceOS::Driver::RedisStorage.new("mod-1235")
@@ -154,7 +176,7 @@ module PlaceOS::Model
       state.triggered.should be_true
       state2.triggered.should be_true
 
-      compare2 = Trigger::Conditions::Comparison.new(
+      compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
         operator: "equal",
         right: {
@@ -168,13 +190,15 @@ module PlaceOS::Model
       trigger.conditions_will_change!
       trigger.save!
 
+      trigger_loader.process_resource(:updated, trigger).success?.should be_true
+
       sleep 0.1
 
       # The state is replaced with a new state on update
-      state = LOADER.instances[inst.id]
+      state = mappings.with_instances &.[inst.id]
       state.triggered.should be_false
 
-      state2 = LOADER.instances[inst2.id]
+      state2 = mappings.with_instances &.[inst2.id]
       state2.triggered.should be_false
       store[:greeting] = "hello".to_json
 
@@ -183,7 +207,7 @@ module PlaceOS::Model
       state.triggered.should be_true
       state2.triggered.should be_true
 
-      func = Trigger::Actions::Function.new(
+      func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",
         method: "start"
       )
@@ -201,9 +225,8 @@ module PlaceOS::Model
 
       trigger.actions.try &.functions = [func]
       trigger.actions_will_change!
-      trigger.save!
 
-      sleep 0.1
+      trigger_loader.process_resource(:updated, trigger).success?.should be_true
 
       # Check the state in redis
       inst_store = PlaceOS::Driver::RedisStorage.new(inst.id.not_nil!)

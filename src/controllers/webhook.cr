@@ -26,7 +26,7 @@ module PlaceOS::Triggers::Api
     def create
       trig = @trigger.not_nil!
       trigger_id = trig.id
-      if state = LOADER.instances[trigger_id]?
+      if state = Triggers.mapping.with_instances &.[trigger_id]?
         Log.debug { {
           message:   "setting webhook condition for '#{state.trigger.name}'",
           instance:  trigger_id,
