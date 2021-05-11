@@ -1,7 +1,7 @@
 require "uuid"
 
 abstract class Application < ActionController::Base
-  Log = ::App::Log.for("controller")
+  Log = ::PlaceOS::Triggers::Log.for("controller")
   before_action :set_request_id
 
   # This makes it simple to match client requests with server side logs.

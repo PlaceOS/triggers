@@ -1,15 +1,37 @@
-# Application dependencies
-require "log_helper"
 require "placeos-log-backend"
+require "raven"
+require "raven/integrations/action-controller"
 
-# Application code
 require "./constants"
 
 # Logging configuration
-log_level = App.production? ? Log::Severity::Info : Log::Severity::Debug
-log_backend = PlaceOS::LogBackend.log_backend
+module PlaceOS::Triggers
+  standard_sentry = Raven::LogBackend.new
+  comprehensive_sentry = Raven::LogBackend.new(capture_all: true)
 
-Log.setup "*", :warn, log_backend
-Log.builder.bind "action-controller.*", log_level, log_backend
-Log.builder.bind "#{App::NAME}.*", log_level, log_backend
-Log.builder.bind "e_mail.*", log_level, log_backend
+  # Logging configuration
+  log_backend = PlaceOS::LogBackend.log_backend
+  log_level = Triggers.production? ? ::Log::Severity::Info : ::Log::Severity::Debug
+  namespaces = ["action-controller.*", "place_os.*", "e_mail.*"]
+
+  ::Log.setup do |config|
+    config.bind "*", :warn, log_backend
+
+    namespaces.each do |namespace|
+      config.bind namespace, log_level, log_backend
+
+      # Bind raven's backend
+      config.bind namespace, :info, standard_sentry
+      config.bind namespace, :warn, comprehensive_sentry
+    end
+  end
+
+  # Configure Sentry
+  Raven.configure &.async=(true)
+
+  PlaceOS::LogBackend.register_severity_switch_signals(
+    production: Triggers.production?,
+    namespaces: namespaces,
+    backend: log_backend,
+  )
+end

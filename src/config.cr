@@ -1,6 +1,6 @@
 require "./logging"
 
-# Application dependencies
+# PlaceOS::Triggerslication dependencies
 require "email"
 require "active-model"
 require "action-controller"
@@ -10,7 +10,7 @@ abstract class PlaceOS::Driver; end
 
 class PlaceOS::Driver::Protocol; end
 
-# Application code
+# PlaceOS::Trigger application code
 require "./constants"
 require "./controllers/application"
 require "./controllers/*"
@@ -25,17 +25,20 @@ keeps_headers = ["X-Request-ID"]
 
 # Add handlers that should run before your application
 ActionController::Server.before(
-  ActionController::ErrorHandler.new(App.production?, keeps_headers),
+  ActionController::ErrorHandler.new(PlaceOS::Triggers.production?, keeps_headers),
+  Raven::ActionController::ErrorHandler.new,
   ActionController::LogHandler.new(filter_params, ms: true),
 )
 
 # Set SMTP client configuration
 SMTP_CONFIG = EMail::Client::Config.new(
-  App::SMTP_SERVER,
-  App::SMTP_PORT
+  PlaceOS::Triggers::SMTP_SERVER,
+  PlaceOS::Triggers::SMTP_PORT
 )
-SMTP_CONFIG.use_auth(App::SMTP_USER, App::SMTP_PASS) if App.smtp_authenticated?
-case App::SMTP_SECURE
+
+SMTP_CONFIG.use_auth(PlaceOS::Triggers::SMTP_USER, PlaceOS::Triggers::SMTP_PASS) if PlaceOS::Triggers.smtp_authenticated?
+
+case PlaceOS::Triggers::SMTP_SECURE
 when "SMTPS"
   SMTP_CONFIG.use_tls(EMail::Client::TLSMode::SMTPS)
   SMTP_CONFIG.tls_context.verify_mode = OpenSSL::SSL::VerifyMode::NONE
@@ -44,9 +47,5 @@ when "STARTTLS"
   SMTP_CONFIG.tls_context.verify_mode = OpenSSL::SSL::VerifyMode::NONE
 when ""
 else
-  raise "unknown SMTP_SECURE setting: #{App::SMTP_SECURE.inspect}"
+  raise "unknown SMTP_SECURE setting: #{PlaceOS::Triggers::SMTP_SECURE.inspect}"
 end
-
-# Start monitoring
-LOADER = PlaceOS::Triggers::Loader.new
-LOADER.load!

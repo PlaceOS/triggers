@@ -21,19 +21,21 @@ WebMock.stub(:post, "http://127.0.0.1:2379/v3beta/watch")
   .with(body: "{\"create_request\":{\"key\":\"c2VydmljZS9jb3Jl\",\"range_end\":\"c2VydmljZS9jb3Jm\"}}", headers: {"Content-Type" => "application/json"})
   .to_return(body_io: IO::Stapled.new(*IO.pipe))
 
-# Triggers code
-Log.setup "*", :trace, PlaceOS::LogBackend.log_backend
+# Generators for Engine models
+require "./generator"
+require "../src/config"
 
 # Configure DB
 db_name = "test"
 
-RethinkORM.configure do |settings|
-  settings.db = db_name
-end
+Spec.before_suite do
+  # Triggers code
+  Log.setup "*", :trace, PlaceOS::LogBackend.log_backend
 
-# Generators for Engine models
-require "./generator"
-require "../src/config"
+  RethinkORM.configure do |settings|
+    settings.db = db_name
+  end
+end
 
 # Clear test tables on exit
 Spec.after_suite do

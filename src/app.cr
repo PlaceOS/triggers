@@ -4,13 +4,13 @@ require "option_parser"
 require "./constants"
 
 # Server defaults
-port = App::DEFAULT_PORT
-host = App::DEFAULT_HOST
-process_count = App::DEFAULT_PROCESS_COUNT
+port = PlaceOS::Triggers::DEFAULT_PORT
+host = PlaceOS::Triggers::DEFAULT_HOST
+process_count = PlaceOS::Triggers::DEFAULT_PROCESS_COUNT
 
 # Command line options
 OptionParser.parse(ARGV.dup) do |parser|
-  parser.banner = "Usage: #{App::NAME} [arguments]"
+  parser.banner = "Usage: #{PlaceOS::Triggers::NAME} [arguments]"
 
   parser.on("-b HOST", "--bind=HOST", "Specifies the server host") { |h| host = h }
   parser.on("-p PORT", "--port=PORT", "Specifies the server port") { |p| port = p.to_i }
@@ -25,7 +25,7 @@ OptionParser.parse(ARGV.dup) do |parser|
   end
 
   parser.on("-v", "--version", "Display the application version") do
-    puts "#{App::NAME} v#{App::VERSION}"
+    puts "#{PlaceOS::Triggers::NAME} v#{PlaceOS::Triggers::VERSION}"
     exit 0
   end
 
@@ -50,45 +50,36 @@ end
 # Load the routes
 require "./config"
 
-App::Log.info { "launching #{App::NAME} v#{App::VERSION}" }
+module PlaceOS::Triggers
+  Log.info { "launching #{NAME} v#{VERSION}" }
 
-server = ActionController::Server.new(port, host)
+  server = ActionController::Server.new(port, host)
 
-# Start clustering
-server.cluster(process_count, "-w", "--workers") if process_count != 1
+  # Start clustering
+  server.cluster(process_count, "-w", "--workers") if process_count != 1
 
-terminate = Proc(Signal, Nil).new do |signal|
-  puts " > terminating gracefully"
-  spawn(same_thread: true) { server.close }
-  signal.ignore
+  terminate = Proc(Signal, Nil).new do |signal|
+    puts " > terminating gracefully"
+    spawn(same_thread: true) { server.close }
+    signal.ignore
+  end
+
+  # Detect ctr-c to shutdown gracefully
+  # Docker containers use the term signal
+  Signal::INT.trap &terminate
+  Signal::TERM.trap &terminate
+
+  # Start watching trigger table
+  trigger_loader = Loader::Trigger.new(self.mapping).start
+
+  # Start watching trigger instance table
+  trigger_instance_loader = Loader::TriggerInstance.new(self.mapping).start
+
+  # Start the server
+  server.run do
+    Log.info { "listening on #{server.print_addresses}" }
+  end
+
+  # Shutdown message
+  Log.info { "#{NAME} leaps through the veldt" }
 end
-
-# Detect ctr-c to shutdown gracefully
-# Docker containers use the term signal
-Signal::INT.trap &terminate
-Signal::TERM.trap &terminate
-
-# Allow signals to change the log level at run-time
-logging = Proc(Signal, Nil).new do |signal|
-  log_level = signal.usr1? ? Log::Severity::Debug : Log::Severity::Info
-  log_backend = PlaceOS::LogBackend.log_backend
-  puts " > Log level changed to #{log_level}"
-  Log.builder.bind "action-controller.*", log_level, log_backend
-  Log.builder.bind "#{App::NAME}.*", log_level, log_backend
-  Log.builder.bind "e_mail.*", log_level, log_backend
-  EMail::Client.log_level = log_level
-  signal.ignore
-end
-
-# Turn on DEBUG level logging `kill -s USR1 %PID`
-# Default production log levels (INFO and above) `kill -s USR2 %PID`
-Signal::USR1.trap &logging
-Signal::USR2.trap &logging
-
-# Start the server
-server.run do
-  App::Log.info { "listening on #{server.print_addresses}" }
-end
-
-# Shutdown message
-App::Log.info { "#{App::NAME} leaps through the veldt" }
