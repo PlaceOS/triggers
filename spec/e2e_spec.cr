@@ -6,22 +6,18 @@ require "placeos-driver/proxy/subscriptions"
 require "placeos-driver/proxy/remote_driver"
 
 module PlaceOS::Triggers
-  # Trigger state for the system
-  mappings = Mapping.new
-
-  # Start watching trigger table
-  trigger_loader = Loader::Trigger.new(mappings)
-
-  # Start watching trigger instance table
-  instance_loader = Loader::TriggerInstance.new(mappings)
-
-  Spec.after_suite do
+  Spec.after_each do
     store = ::PlaceOS::Driver::RedisStorage.new("mod-1234")
     store.clear
   end
 
   describe "e2e" do
     it "creates a trigger, updates it and checks that exec works" do
+      # Trigger state for the system
+      mappings = Mapping.new
+      trigger_loader = Loader::Trigger.new(mappings)
+      instance_loader = Loader::TriggerInstance.new(mappings)
+
       trigger = Model::Generator.trigger
       compare = Model::Trigger::Conditions::Comparison.new(
         left: true,
@@ -122,9 +118,14 @@ module PlaceOS::Triggers
       status["trigger_count"].as_i.should eq(1)
       status["action_errors"].as_i.should eq(0)
       status["comparison_errors"].as_i.should eq(0)
-    end # it
+    end
 
-    it "creates two triggers, updates them and checks they works" do
+    it "creates two triggers, updates them and checks they work" do
+      # Trigger state for the system
+      mappings = Mapping.new
+      trigger_loader = Loader::Trigger.new(mappings)
+      instance_loader = Loader::TriggerInstance.new(mappings)
+
       system = Model::Generator.control_system.save!
 
       trigger = Model::Generator.trigger
@@ -160,6 +161,7 @@ module PlaceOS::Triggers
 
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
+
       # Ensure the trigger hasn't fired
       state = mappings.with_instances &.[inst.id]
       state.triggered.should be_false
@@ -242,6 +244,6 @@ module PlaceOS::Triggers
       status["trigger_count"].as_i.should eq(1)
       status["action_errors"].as_i.should eq(0)
       status["comparison_errors"].as_i.should eq(0)
-    end # it
-  end   # describe
-end     # module
+    end
+  end
+end
