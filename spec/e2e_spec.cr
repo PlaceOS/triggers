@@ -6,11 +6,8 @@ require "placeos-driver/proxy/subscriptions"
 require "placeos-driver/proxy/remote_driver"
 
 module PlaceOS::Triggers
-  @@module_id : String?
-  @@store : Driver::RedisStorage?
-
-  class_getter! module_id
-  class_getter! store
+  class_getter! module_id : String
+  class_getter! store : Driver::RedisStorage
 
   Spec.before_each do
     @@module_id = "mod-#{Random::DEFAULT.hex(8)}"
