@@ -5,7 +5,7 @@ require "raven/integrations/action-controller"
 require "./constants"
 
 # Logging configuration
-module PlaceOS::Triggers
+module PlaceOS::Triggers::Logging
   standard_sentry = Raven::LogBackend.new
   comprehensive_sentry = Raven::LogBackend.new(capture_all: true)
 
