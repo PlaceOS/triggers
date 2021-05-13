@@ -138,13 +138,17 @@ module PlaceOS::Triggers
     end
 
     def publish_state
-      @storage["state"] = {
+      state = {
         triggered:         @triggered,
         trigger_count:     @count,
         action_errors:     @action_errors,
         comparison_errors: @comparison_errors,
         conditions:        @conditions_met,
-      }.to_json
+      }
+
+      Log.debug { state.merge(message: "publishing trigger instance state", trigger_instance_id: @instance_id) }
+
+      @storage["state"] = state.to_json
     end
 
     def update_state(triggered : Bool)

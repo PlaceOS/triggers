@@ -6,8 +6,18 @@ require "placeos-driver/proxy/subscriptions"
 require "placeos-driver/proxy/remote_driver"
 
 module PlaceOS::Triggers
+  @@module_id : String?
+  @@store : Driver::RedisStorage?
+
+  class_getter! module_id
+  class_getter! store
+
+  Spec.before_each do
+    @@module_id = "mod-#{Random::DEFAULT.hex(8)}"
+    @@store = ::PlaceOS::Driver::RedisStorage.new(module_id)
+  end
+
   Spec.after_each do
-    store = ::PlaceOS::Driver::RedisStorage.new("mod-1234")
     store.clear
   end
 
@@ -41,7 +51,7 @@ module PlaceOS::Triggers
       # create the status lookup structure
       sys_id = inst.control_system_id.not_nil!
       storage = PlaceOS::Driver::RedisStorage.new(sys_id, "system")
-      storage["Test/1"] = "mod-1234"
+      storage["Test/1"] = module_id
 
       PlaceOS::Driver::Subscriptions.new_redis.publish "lookup-change", sys_id
 
@@ -54,7 +64,7 @@ module PlaceOS::Triggers
       state = mappings.with_instances &.[inst.id]
       state.triggered.should be_false
 
-      store = PlaceOS::Driver::RedisStorage.new("mod-1234")
+      store = PlaceOS::Driver::RedisStorage.new(module_id)
       store[:state] = {on: true}.to_json
 
       sleep 0.1
@@ -98,10 +108,10 @@ module PlaceOS::Triggers
       meta = PlaceOS::Driver::DriverModel::Metadata.new({
         "start" => {} of String => Array(JSON::Any),
       }, ["Functoids"])
-      redis.set("interface/mod-1234", meta.to_json)
+      redis.set("interface/#{module_id}", meta.to_json)
 
       # mock out the exec request
-      WebMock.stub(:post, "http://127.0.0.1:9001/api/core/v1/command/mod-1234/execute")
+      WebMock.stub(:post, "http://127.0.0.1:9001/api/core/v1/command/#{module_id}/execute")
         .with(body: "{\"__exec__\":\"start\",\"start\":{}}")
         .to_return(body: "null")
 
@@ -138,6 +148,7 @@ module PlaceOS::Triggers
           keys:   ["on"],
         }
       )
+
       trigger.conditions.try &.comparisons = [compare]
       trigger.valid?.should be_true
       trigger.save!
@@ -153,7 +164,7 @@ module PlaceOS::Triggers
       # create the status lookup structure
       sys_id = system.id.not_nil!
       storage = PlaceOS::Driver::RedisStorage.new(sys_id, "system")
-      storage["Test/1"] = "mod-1235"
+      storage["Test/1"] = module_id
 
       PlaceOS::Driver::Subscriptions.new_redis.publish "lookup-change", sys_id
 
@@ -169,7 +180,7 @@ module PlaceOS::Triggers
       state2 = mappings.with_instances &.[inst2.id]
       state2.triggered.should be_false
 
-      store = PlaceOS::Driver::RedisStorage.new("mod-1235")
+      store = PlaceOS::Driver::RedisStorage.new(module_id)
       store[:state] = {on: true}.to_json
 
       sleep 0.1
@@ -191,6 +202,7 @@ module PlaceOS::Triggers
       trigger.conditions.try &.comparisons = [compare, compare2]
       trigger.conditions_will_change!
       trigger.save!
+      trigger.conditions_will_change!
 
       trigger_loader.process_resource(:updated, trigger).success?.should be_true
 
@@ -218,27 +230,33 @@ module PlaceOS::Triggers
       meta = PlaceOS::Driver::DriverModel::Metadata.new({
         "start" => {} of String => Array(JSON::Any),
       }, ["Functoids"])
-      redis.set("interface/mod-1235", meta.to_json)
+      redis.set("interface/#{module_id}", meta.to_json)
 
       # mock out the exec request
-      WebMock.stub(:post, "http://127.0.0.1:9001/api/core/v1/command/mod-1235/execute")
+      WebMock.stub(:post, "http://127.0.0.1:9001/api/core/v1/command/#{module_id}/execute")
         .with(body: "{\"__exec__\":\"start\",\"start\":{}}")
         .to_return(body: "null")
 
       trigger.actions.try &.functions = [func]
       trigger.actions_will_change!
+      trigger.save!
+      trigger.actions_will_change!
 
       trigger_loader.process_resource(:updated, trigger).success?.should be_true
+
+      sleep 0.1
 
       # Check the state in redis
       inst_store = PlaceOS::Driver::RedisStorage.new(inst.id.not_nil!)
       status = JSON.parse(inst_store["state"])
+
       status["triggered"].as_bool.should be_true
       status["trigger_count"].as_i.should eq(1)
       status["action_errors"].as_i.should eq(0)
       status["comparison_errors"].as_i.should eq(0)
 
       inst_store = PlaceOS::Driver::RedisStorage.new(inst2.id.not_nil!)
+
       status = JSON.parse(inst_store["state"])
       status["triggered"].as_bool.should be_true
       status["trigger_count"].as_i.should eq(1)
