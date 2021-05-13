@@ -21,8 +21,8 @@ module PlaceOS::Triggers
       config.bind namespace, log_level, log_backend
 
       # Bind raven's backend
-      config.bind namespace, :info, standard_sentry
-      config.bind namespace, :warn, comprehensive_sentry
+      config.bind namespace, :warn, standard_sentry
+      config.bind namespace, :error, comprehensive_sentry
     end
   end
 
