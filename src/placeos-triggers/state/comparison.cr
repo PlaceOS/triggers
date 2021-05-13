@@ -4,8 +4,10 @@ module PlaceOS::Triggers
   class State::Comparison
     Log = ::Log.for(self)
 
+    alias Operator = Model::Trigger::Conditions::Comparison::Operator
+
     property left : Constant
-    property compare : String
+    property operator : Operator
     property right : Constant
 
     def initialize(
@@ -13,7 +15,7 @@ module PlaceOS::Triggers
       @condition_key : String,
       @system_id : String,
       left : Model::Trigger::Conditions::Comparison::Value,
-      @compare : String,
+      @operator : Operator,
       right : Model::Trigger::Conditions::Comparison::Value
     )
       @left = self.class.parse_model_comparison(left)
@@ -26,40 +28,14 @@ module PlaceOS::Triggers
       nil
     end
 
-    # ameba:disable Metrics/CyclomaticComplexity
     def compare!
       left_val = @left.value
       right_val = @right.value
 
-      result = case compare
-               when "equal"
-                 left_val == right_val
-               when "not_equal"
-                 left_val != right_val
-               when "greater_than"
-                 left_val.as(Float64 | Int64) > right_val.as(Float64 | Int64)
-               when "greater_than_or_equal"
-                 left_val.as(Float64 | Int64) >= right_val.as(Float64 | Int64)
-               when "less_than"
-                 left_val.as(Float64 | Int64) < right_val.as(Float64 | Int64)
-               when "less_than_or_equal"
-                 left_val.as(Float64 | Int64) <= right_val.as(Float64 | Int64)
-               when "and"
-                 left_val != false && right_val != false && !left_val.nil? && !right_val.nil?
-               when "or"
-                 (left_val != false && !left_val.nil?) || (right_val != false && !right_val.nil?)
-               when "exclusive_or"
-                 if left_val != false && right_val != false && !left_val.nil? && !right_val.nil?
-                   false
-                 else
-                   (left_val != false && !left_val.nil?) || (right_val != false && !right_val.nil?)
-                 end
-               else
-                 false
-               end
+      result = operator.compare(left_val, right_val)
 
       Log.debug { {
-        message:   "comparing #{left_val.inspect} #{compare} #{right_val.inspect} == #{result}",
+        message:   "comparing #{left_val.inspect} #{operator} #{right_val.inspect} == #{result}",
         system_id: @system_id,
       } }
 
@@ -68,7 +44,7 @@ module PlaceOS::Triggers
       @state.set_condition @condition_key, false
       @state.increment_comparison_error
       Log.warn(exception: error) { {
-        message:   "comparing #{@left.value.inspect} #{@compare} #{@right.value.inspect}",
+        message:   "comparing #{@left.value.inspect} #{@operator} #{@right.value.inspect}",
         system_id: @system_id,
       } }
     end
@@ -100,26 +76,26 @@ module PlaceOS::Triggers
       end
 
       def bind!(comparison, subscriptions, system_id) : Nil
-        module_name, index = Driver::Proxy::RemoteDriver.get_parts(status[:mod])
+        module_name, index = Driver::Proxy::RemoteDriver.get_parts(status.mod)
 
         Log.context.set(system_id: system_id, module: module_name, index: index)
 
         Log.debug { {
-          status:  status[:status],
-          message: "subscribed to '#{status[:status]}'",
+          status:  status.status,
+          message: "subscribed to '#{status.status}'",
         } }
 
-        subscriptions.subscribe(system_id, module_name, index, status[:status]) do |_, data|
+        subscriptions.subscribe(system_id, module_name, index, status.status) do |_, data|
           val = JSON.parse(data)
 
           Log.debug { {
-            status:  status[:status],
+            status:  status.status,
             message: "received value for comparison: #{data}",
           } }
 
           # Grab the deeper key if specified
-          final_index = status[:keys].size - 1
-          status[:keys].each_with_index do |key, inner_index|
+          final_index = status.keys.size - 1
+          status.keys.each_with_index do |key, inner_index|
             break if val.raw.nil?
 
             next_val = val[key]?
@@ -143,8 +119,8 @@ module PlaceOS::Triggers
           end
 
           Log.debug { {
-            status:  status[:status],
-            message: "dug for #{status[:keys]} - got #{val.inspect}",
+            status:  status.status,
+            message: "dug for #{status.keys} - got #{val.inspect}",
           } }
 
           # Update the value and re-compare

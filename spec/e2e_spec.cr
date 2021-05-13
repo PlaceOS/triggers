@@ -31,12 +31,12 @@ module PlaceOS::Triggers
       trigger = Model::Generator.trigger
       compare = Model::Trigger::Conditions::Comparison.new(
         left: true,
-        operator: "and",
-        right: {
-          mod:    "Test_1",
+        operator: :and,
+        right: Model::Trigger::Conditions::Comparison::StatusVariable.new(
+          mod: "Test_1",
           status: "state",
-          keys:   ["on"],
-        }
+          keys: ["on"],
+        )
       )
       trigger.conditions.try &.comparisons = [compare]
       trigger.valid?.should be_true
@@ -74,12 +74,12 @@ module PlaceOS::Triggers
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
-        operator: "equal",
-        right: {
-          mod:    "Test_1",
+        operator: :equal,
+        right: Model::Trigger::Conditions::Comparison::StatusVariable.new(
+          mod: "Test_1",
           status: "greeting",
-          keys:   [] of String,
-        }
+          keys: [] of String,
+        )
       )
 
       trigger.conditions.try &.comparisons = [compare, compare2]
@@ -141,12 +141,12 @@ module PlaceOS::Triggers
       trigger = Model::Generator.trigger
       compare = Model::Trigger::Conditions::Comparison.new(
         left: true,
-        operator: "and",
-        right: {
-          mod:    "Test_1",
+        operator: :equal,
+        right: Model::Trigger::Conditions::Comparison::StatusVariable.new(
+          mod: "Test_1",
           status: "state",
-          keys:   ["on"],
-        }
+          keys: ["on"],
+        )
       )
 
       trigger.conditions.try &.comparisons = [compare]
@@ -191,12 +191,12 @@ module PlaceOS::Triggers
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
-        operator: "equal",
-        right: {
-          mod:    "Test_1",
+        operator: :equal,
+        right: Model::Trigger::Conditions::Comparison::StatusVariable.new(
+          mod: "Test_1",
           status: "greeting",
-          keys:   [] of String,
-        }
+          keys: [] of String,
+        )
       )
 
       trigger.conditions.try &.comparisons = [compare, compare2]
