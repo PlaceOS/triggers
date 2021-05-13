@@ -28,9 +28,11 @@ module PlaceOS::Triggers
     def new_instance(instance : Model::TriggerInstance)
       mapping_lock.synchronize do
         trigger_id = instance.trigger_id.as(String)
+        trigger = trigger_cache[trigger_id]?
 
-        if (trigger = trigger_cache[trigger_id]?).nil?
-          trigger = trigger_cache[trigger_id] = instance.trigger.not_nil!
+        if trigger.nil?
+          trigger = instance.trigger.not_nil!
+          trigger_cache[trigger_id] = trigger
         end
 
         new_instance(trigger, instance)
@@ -47,9 +49,11 @@ module PlaceOS::Triggers
     end
 
     def remove_instance(instance)
-      if state = @instances[instance.id]?
-        self.trigger_state[instance.trigger_id]?.try &.delete(state)
-        state.terminate!
+      mapping_lock.synchronize do
+        instances.delete(instance.id).try do |state|
+          self.trigger_state[instance.trigger_id]?.try &.delete(state)
+          state.terminate!
+        end
       end
 
       nil
@@ -76,6 +80,7 @@ module PlaceOS::Triggers
           instance = state.instance
           self.instances.delete(instance.id)
           state.terminate!
+
           new_instance(trigger, instance)
         end
       end
