@@ -8,16 +8,11 @@ require "placeos-driver/subscriptions"
 require "placeos-driver/proxy/subscriptions"
 require "placeos-driver/proxy/remote_driver"
 
-# NOTE:: webhooks should allow drivers to process and provide responses
-# JohnsonControls => posts xml, expects a 200 response (no security)
-# Meraki
-# => get route, return secret
-# => post json, return 200
-# CogniPoint => post json, return 200 (header token)
+# NOTE: Webhooks should allow drivers to process and provide responses
 
 module PlaceOS::Triggers
   class State
-    Log = ::PlaceOS::Triggers::Log.for("state")
+    Log = ::Log.for(self)
 
     @@subscriber = PlaceOS::Driver::Subscriptions.new
 

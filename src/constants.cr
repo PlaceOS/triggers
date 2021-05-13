@@ -4,7 +4,7 @@ module PlaceOS::Triggers
   NAME    = "triggers"
   VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
 
-  Log         = ::Log.for(NAME)
+  Log         = ::Log.for(self)
   ENVIRONMENT = ENV["SG_ENV"]?.presence || "development"
 
   DEFAULT_PORT          = (ENV["SG_SERVER_PORT"]? || 3000).to_i
