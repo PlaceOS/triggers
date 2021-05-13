@@ -1,6 +1,6 @@
 require "./logging"
 
-# PlaceOS::Triggerslication dependencies
+# Application dependencies
 require "email"
 require "active-model"
 require "action-controller"
@@ -10,7 +10,7 @@ abstract class PlaceOS::Driver; end
 
 class PlaceOS::Driver::Protocol; end
 
-# PlaceOS::Trigger application code
+# Application code
 require "./constants"
 require "./controllers/application"
 require "./controllers/*"
@@ -47,5 +47,5 @@ when "STARTTLS"
   SMTP_CONFIG.tls_context.verify_mode = OpenSSL::SSL::VerifyMode::NONE
 when ""
 else
-  raise "unknown SMTP_SECURE setting: #{PlaceOS::Triggers::SMTP_SECURE.inspect}"
+  abort "unknown SMTP_SECURE setting: #{PlaceOS::Triggers::SMTP_SECURE.inspect}"
 end
