@@ -31,6 +31,7 @@ services:
       << : *redis-client-env
       << : *rethinkdb-client-env
       # Environment
+      GITHUB_ACTION: ${GITHUB_ACTION:-}
       << : *deployment-env
 
   redis:
