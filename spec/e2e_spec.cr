@@ -64,7 +64,6 @@ module PlaceOS::Triggers
       state = mappings.with_instances &.[inst.id]
       state.triggered.should be_false
 
-      store = PlaceOS::Driver::RedisStorage.new(module_id)
       store[:state] = {on: true}.to_json
 
       sleep 0.1
@@ -180,7 +179,6 @@ module PlaceOS::Triggers
       state2 = mappings.with_instances &.[inst2.id]
       state2.triggered.should be_false
 
-      store = PlaceOS::Driver::RedisStorage.new(module_id)
       store[:state] = {on: true}.to_json
 
       sleep 0.1
