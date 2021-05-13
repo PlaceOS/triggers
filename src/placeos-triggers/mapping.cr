@@ -4,9 +4,13 @@ module PlaceOS::Triggers
   class Mapping
     private getter mapping_lock = Mutex.new(protection: :reentrant)
 
-    protected getter trigger_cache = {} of String => Model::Trigger
-    protected getter trigger_state = Hash(String, Array(State)).new { |hash, key| hash[key] = [] of State }
-    protected getter trigger_instance_state = {} of String => State
+    private getter trigger_cache = {} of String => Model::Trigger
+    private getter trigger_state = Hash(String, Array(State)).new { |hash, key| hash[key] = [] of State }
+    private getter trigger_instance_state = {} of String => State
+
+    def state_for?(trigger_instance : Model::TriggerInstance)
+      trigger_instance_state[trigger_instance.id.as(String)]?
+    end
 
     # Instances
     ###############################################################################################
