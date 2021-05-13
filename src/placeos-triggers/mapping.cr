@@ -4,15 +4,9 @@ module PlaceOS::Triggers
   class Mapping
     private getter mapping_lock = Mutex.new(protection: :reentrant)
 
-    private getter trigger_cache = {} of String => Model::Trigger
-    private getter trigger_state = Hash(String, Array(State)).new { |hash, key| hash[key] = [] of State }
-    private getter instances = {} of String => State
-
-    def with_instances(& : Hash(String, State) ->)
-      mapping_lock.synchronize do
-        yield self.instances
-      end
-    end
+    protected getter trigger_cache = {} of String => Model::Trigger
+    protected getter trigger_state = Hash(String, Array(State)).new { |hash, key| hash[key] = [] of State }
+    protected getter trigger_instance_state = {} of String => State
 
     # Instances
     ###############################################################################################
@@ -34,7 +28,7 @@ module PlaceOS::Triggers
     def new_instance(trigger : Model::Trigger, instance : Model::TriggerInstance)
       mapping_lock.synchronize do
         State.new(trigger, instance).tap do |state|
-          self.instances[instance.id.as(String)] = state
+          self.trigger_instance_state[instance.id.as(String)] = state
           self.trigger_state[trigger.id.as(String)] << state
         end
       end
@@ -49,7 +43,7 @@ module PlaceOS::Triggers
 
     def remove_instance(instance : Model::TriggerInstance)
       mapping_lock.synchronize do
-        instances.delete(instance.id).try do |state|
+        trigger_instance_state.delete(instance.id).try do |state|
           self.trigger_state[instance.trigger_id]?.try &.delete(state)
           state.terminate!
         end
@@ -71,7 +65,7 @@ module PlaceOS::Triggers
         self.trigger_cache[trigger_id] = trigger
         self.trigger_state.delete(trigger_id).try &.each do |state|
           instance = state.instance
-          self.instances.delete(instance.id)
+          self.trigger_instance_state.delete(instance.id)
           state.terminate!
 
           new_instance(trigger, instance)
@@ -84,7 +78,7 @@ module PlaceOS::Triggers
       mapping_lock.synchronize do
         self.trigger_cache.delete trigger_id
         self.trigger_state.delete(trigger_id).try &.each do |state|
-          self.instances.delete state.instance_id
+          self.trigger_instance_state.delete state.instance_id
           state.terminate!
         end
       end
