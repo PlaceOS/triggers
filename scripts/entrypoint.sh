@@ -2,7 +2,7 @@
 
 set -eu
 
-if [ -z ${GITHUB_ACTION+x} ]
+if [ -z ${CI+x} ]
 then
   echo '### `crystal tool format --check`'
   crystal tool format --check
