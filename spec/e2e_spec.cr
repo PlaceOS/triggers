@@ -58,7 +58,7 @@ module PlaceOS::Triggers
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
 
       # Ensure the trigger hasn't fired
-      state = mappings.trigger_instance_state[inst.id.not_nil!]
+      state = mappings.state_for?(inst).not_nil!
       state.triggered.should be_false
 
       store[:state] = {on: true}.to_json
@@ -87,7 +87,7 @@ module PlaceOS::Triggers
       sleep 0.1
 
       # The state is replaced with a new state on update
-      state = mappings.trigger_instance_state[inst.id.not_nil!]
+      state = mappings.state_for?(inst).not_nil!
       state.triggered.should be_false
       store[:greeting] = "hello".to_json
 
@@ -170,10 +170,10 @@ module PlaceOS::Triggers
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
 
       # Ensure the trigger hasn't fired
-      state = mappings.trigger_instance_state[inst.id.not_nil!]
+      state = mappings.state_for?(inst).not_nil!
       state.triggered.should be_false
 
-      state2 = mappings.trigger_instance_state[inst2.id.not_nil!]
+      state2 = mappings.state_for?(inst2).not_nil!
       state2.triggered.should be_false
 
       store[:state] = {on: true}.to_json
@@ -204,10 +204,10 @@ module PlaceOS::Triggers
       sleep 0.1
 
       # The state is replaced with a new state on update
-      state = mappings.trigger_instance_state[inst.id.not_nil!]
+      state = mappings.state_for?(inst).not_nil!
       state.triggered.should be_false
 
-      state2 = mappings.trigger_instance_state[inst2.id.not_nil!]
+      state2 = mappings.state_for?(inst2).not_nil!
       state2.triggered.should be_false
       store[:greeting] = "hello".to_json
 
