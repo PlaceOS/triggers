@@ -14,12 +14,6 @@ module PlaceOS::Triggers
       end
     end
 
-    def with_cache(& : Hash(String, Model::Trigger) ->)
-      mapping_lock.synchronize do
-        yield self.trigger_cache
-      end
-    end
-
     # Instances
     ###############################################################################################
 
