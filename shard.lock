@@ -61,6 +61,10 @@ shards:
     git: https://github.com/place-labs/crystal-etcd.git
     version: 1.2.4
 
+  faker:
+    git: https://github.com/askn/faker.git
+    version: 0.6.0
+
   future:
     git: https://github.com/crystal-community/future.cr.git
     version: 1.0.0

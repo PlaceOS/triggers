@@ -5,6 +5,8 @@ require "random"
 require "webmock"
 require "rethinkdb-orm"
 
+require "placeos-models/spec/generator"
+
 # Prepare for node discovery
 WebMock.stub(:post, "http://127.0.0.1:2379/v3beta/kv/range")
   .with(body: "{\"key\":\"c2VydmljZS9jb3JlLw==\",\"range_end\":\"c2VydmljZS9jb3JlMA==\"}", headers: {"Content-Type" => "application/json"})
@@ -21,8 +23,6 @@ WebMock.stub(:post, "http://127.0.0.1:2379/v3beta/watch")
   .with(body: "{\"create_request\":{\"key\":\"c2VydmljZS9jb3Jl\",\"range_end\":\"c2VydmljZS9jb3Jm\"}}", headers: {"Content-Type" => "application/json"})
   .to_return(body_io: IO::Stapled.new(*IO.pipe))
 
-# Generators for Engine models
-require "./generator"
 require "../src/config"
 
 # Configure DB
