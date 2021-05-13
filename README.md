@@ -1,9 +1,9 @@
 # PlaceOS Triggers
 
-[![Build Status](https://api.travis-ci.com/PlaceOS/triggers.svg?branch=master)](https://travis-ci.com/placeos/triggers)
+[![Build Dev Image](https://github.com/PlaceOS/triggers/actions/workflows/build-dev-image.yml/badge.svg)](https://github.com/PlaceOS/triggers/actions/workflows/build-dev-image.yml)
+[![CI](https://github.com/PlaceOS/triggers/actions/workflows/ci.yml/badge.svg)](https://github.com/PlaceOS/triggers/actions/workflows/ci.yml)
 
 PlaceOS service handling events and conditional triggers.
-
 
 ## EVN Vars
 
