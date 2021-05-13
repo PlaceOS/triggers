@@ -1,12 +1,12 @@
 require "hound-dog"
-require "placeos-models"
+require "json"
 require "tasker"
 
-require "json"
+require "placeos-models"
+require "placeos-driver/proxy/remote_driver"
+require "placeos-driver/proxy/subscriptions"
 require "placeos-driver/storage"
 require "placeos-driver/subscriptions"
-require "placeos-driver/proxy/subscriptions"
-require "placeos-driver/proxy/remote_driver"
 
 # NOTE: Webhooks should allow drivers to process and provide responses
 
@@ -16,66 +16,64 @@ module PlaceOS::Triggers
 
     @@subscriber = PlaceOS::Driver::Subscriptions.new
 
+    @terminated : Bool = false
+    @comparison_errors : Int64 = 0_i64
+    @action_errors : Int64 = 0_i64
+
+    getter count : Int64 = 0_i64
+    getter triggered : Bool = false
+
+    getter trigger : Model::Trigger
+    getter instance : Model::TriggerInstance
+    getter trigger_id : String { trigger.id.not_nil! }
+    getter instance_id : String { instance.id.not_nil! }
+
+    private getter debounce_period : Time::Span do
+      trigger.debounce_period ? trigger.debounce_period.milliseconds : 59.seconds
+    end
+
+    private getter conditions_met = {} of String => Bool
+    private getter condition_timers = [] of Tasker::Task
+    private getter debounce_timers = {} of String => Tasker::Task
+    private getter comparisons = [] of Comparison
+
+    private getter subscriptions : Driver::Proxy::Subscriptions { PlaceOS::Driver::Proxy::Subscriptions.new(@@subscriber) }
+
+    private getter storage : Driver::RedisStorage do
+      # Fresh state for the trigger instance
+      PlaceOS::Driver::RedisStorage.new(instance_id).tap &.clear
+    end
+
     def initialize(@trigger : Model::Trigger, @instance : Model::TriggerInstance)
-      @terminated = false
-      @trigger_id = @trigger.id.not_nil!
-      @instance_id = @instance.id.not_nil!
-      @subscriptions = PlaceOS::Driver::Proxy::Subscriptions.new(@@subscriber)
+      conditions_met["webhook"] = false if trigger.enable_webhook
 
-      @conditions_met = {} of String => Bool
-      @conditions_met["webhook"] = false if @trigger.enable_webhook
-
-      debounce_period = @trigger.debounce_period || 0
-      @debounce_period = debounce_period == 0 ? 59.seconds : debounce_period.milliseconds
-
-      @condition_timers = [] of Tasker::Task
-      @debounce_timers = {} of String => Tasker::Task
-      @comparisons = [] of Comparison
-
-      @triggered = false
-      @count = 0_i64
-      @comparison_errors = 0_i64
-      @action_errors = 0_i64
-      @storage = PlaceOS::Driver::RedisStorage.new(@instance_id)
-      @storage.clear
+      # Set the initial state of the trigger instance
       publish_state
 
       # New thread!
       spawn { monitor! }
     end
 
-    @debounce_period : Time::Span
-
-    getter trigger_id : String
-    getter instance_id : String
-    getter trigger : Model::Trigger
-    getter instance : Model::TriggerInstance
-    getter triggered : Bool
-    getter count : Int64
-
     def terminate!
       @terminated = true
 
-      # cancel timers
-      @condition_timers.each(&.cancel)
-      @debounce_timers.each_value(&.cancel)
-      @condition_timers.clear
-      @debounce_timers.clear
+      # Cancel timers
+      condition_timers.each(&.cancel)
+      debounce_timers.each_value(&.cancel)
+      condition_timers.clear
+      debounce_timers.clear
 
-      # cancel subscriptions
-      @subscriptions.terminate
+      # Cancel subscriptions
+      subscriptions.terminate
     end
 
     def monitor!
       return if @terminated
 
-      conditions = @trigger.conditions.not_nil!
-
       # Build the time triggers
-      times = conditions.time_dependents.not_nil!
-      times.each_with_index do |time, index|
+      trigger.conditions.time_dependents.each_with_index do |time, index|
         condition_key = "time_#{index}"
-        @conditions_met[condition_key] = false
+        conditions_met[condition_key] = false
 
         case time.type
         in .at?   then time_at(condition_key, time.time.not_nil!)
@@ -83,40 +81,39 @@ module PlaceOS::Triggers
         end
       end
 
-      # monitor status values to track conditions
-      system_id = @instance.control_system_id.not_nil!
-      comparisons = conditions.comparisons.not_nil!
-      comparisons.each_with_index do |comparison, index|
+      # Monitor status values to track conditions
+      system_id = instance.control_system_id.not_nil!
+      trigger.conditions.comparisons.each_with_index do |comparison, index|
         condition_key = "comparison_#{index}"
-        @conditions_met[condition_key] = false
+        conditions_met[condition_key] = false
 
-        @comparisons << Comparison.new(
+        self.comparisons << Comparison.new(
           self,
           condition_key,
           system_id,
-          comparison.left.not_nil!,
-          comparison.operator.not_nil!,
-          comparison.right.not_nil!
+          comparison.left,
+          comparison.operator,
+          comparison.right
         )
       end
 
-      @comparisons.each(&.bind!(@subscriptions))
+      self.comparisons.each(&.bind!(subscriptions))
     rescue error
       Log.error(exception: error) { {
-        system_id: @instance.control_system_id,
-        trigger:   @instance.trigger_id,
-        instance:  @instance.id,
-        message:   "failed to initialize trigger instance '#{@trigger.name}'",
+        system_id: instance.control_system_id,
+        trigger:   instance.trigger_id,
+        instance:  instance.id,
+        message:   "failed to initialize trigger instance '#{trigger.name}'",
       } }
     end
 
     def set_condition(key : String, state : Bool)
-      @conditions_met[key] = state
+      conditions_met[key] = state
       check_trigger!
     end
 
     def check_trigger!
-      update_state !@conditions_met.values.includes?(false)
+      update_state !conditions_met.values.includes?(false)
     end
 
     def increment_action_error
@@ -139,21 +136,22 @@ module PlaceOS::Triggers
 
     def publish_state
       state = {
-        triggered:         @triggered,
-        trigger_count:     @count,
+        triggered:         triggered,
+        trigger_count:     count,
         action_errors:     @action_errors,
         comparison_errors: @comparison_errors,
-        conditions:        @conditions_met,
+        conditions:        conditions_met,
       }
 
-      Log.debug { state.merge(message: "publishing trigger instance state", trigger_instance_id: @instance_id) }
+      Log.debug { state.merge(message: "publishing trigger instance state", trigger_instance_id: instance_id) }
 
-      @storage["state"] = state.to_json
+      storage["state"] = state.to_json
     end
 
     def update_state(triggered : Bool)
       # Check if there was change
       return if triggered == @triggered
+
       if triggered
         begin
           @count += 1
@@ -163,37 +161,35 @@ module PlaceOS::Triggers
       end
 
       @triggered = triggered
+
       publish_state
 
       Log.info { {
-        system_id: @instance.control_system_id,
-        trigger:   @instance.trigger_id,
-        instance:  @instance.id,
+        system_id: instance.control_system_id,
+        trigger:   instance.trigger_id,
+        instance:  instance.id,
         message:   "state changed to #{triggered}",
       } }
 
       # Check if we should run the actions
       return unless triggered
 
-      # perform actions
-      system_id = @instance.control_system_id.not_nil!
-      actions = @trigger.actions.not_nil!
+      system_id = instance.control_system_id.not_nil!
 
-      actions.functions.not_nil!.each_with_index do |action, function_index|
-        modname, index = PlaceOS::Driver::Proxy::RemoteDriver.get_parts(action.mod.not_nil!)
-        method = action.method.not_nil!
-        args = action.args.not_nil!
+      # Perform actions
+      trigger.actions.functions.each_with_index do |action, function_index|
+        modname, index = PlaceOS::Driver::Proxy::RemoteDriver.get_parts(action.mod)
         request_id = "action_#{function_index}_#{Time.utc.to_unix_ms}"
 
         Log.debug { {
           system_id:  system_id,
           module:     modname,
           index:      index,
-          method:     method,
+          method:     action.method,
           request_id: request_id,
-          trigger:    @instance.trigger_id,
-          instance:   @instance.id,
-          message:    "performing exec for trigger '#{@trigger.name}'",
+          trigger:    instance.trigger_id,
+          instance:   instance.id,
+          message:    "performing exec for trigger '#{trigger.name}'",
         } }
 
         begin
@@ -204,8 +200,8 @@ module PlaceOS::Triggers
             PlaceOS::Triggers.discovery
           ).exec(
             PlaceOS::Driver::Proxy::RemoteDriver::Clearance::Admin,
-            method,
-            named_args: args,
+            action.method,
+            named_args: action.args,
             request_id: request_id
           )
         rescue error
@@ -213,38 +209,36 @@ module PlaceOS::Triggers
             system_id:  system_id,
             module:     modname,
             index:      index,
-            method:     method,
+            method:     action.method,
             request_id: request_id,
-            trigger:    @instance.trigger_id,
-            instance:   @instance.id,
-            message:    "exec failed for trigger '#{@trigger.name}'",
+            trigger:    instance.trigger_id,
+            instance:   instance.id,
+            message:    "exec failed for trigger '#{trigger.name}'",
           } }
           increment_action_error
         end
       end
 
-      mailers = actions.mailers.not_nil!
-      if !mailers.empty?
+      unless trigger.actions.mailers.empty?
         Log.debug { {
-          system_id: @instance.control_system_id,
-          trigger:   @instance.trigger_id,
-          instance:  @instance.id,
-          message:   "sending email for trigger '#{@trigger.name}'",
+          system_id: instance.control_system_id,
+          trigger:   instance.trigger_id,
+          instance:  instance.id,
+          message:   "sending email for trigger '#{trigger.name}'",
         } }
 
         begin
           # Create SMTP client object
           client = EMail::Client.new(::SMTP_CONFIG)
           client.start do
-            mailers.each do |mail|
-              content = mail.content.not_nil!
-              mail.emails.not_nil!.each do |address|
+            trigger.actions.mailers.each do |mail|
+              mail.emails.each do |address|
                 # TODO:: Complete subject and from addresses
                 email = EMail::Message.new
                 email.from "triggers@example.com"
                 email.to address
                 email.subject "triggered"
-                email.message content
+                email.message mail.content
 
                 send(email)
               end
@@ -252,10 +246,10 @@ module PlaceOS::Triggers
           end
         rescue error
           Log.error(exception: error) { {
-            system_id: @instance.control_system_id,
-            trigger:   @instance.trigger_id,
-            instance:  @instance.id,
-            message:   "email send failed for trigger '#{@trigger.name}'",
+            system_id: instance.control_system_id,
+            trigger:   instance.trigger_id,
+            instance:  instance.id,
+            message:   "email send failed for trigger '#{trigger.name}'",
           } }
           increment_action_error
         end
@@ -263,27 +257,27 @@ module PlaceOS::Triggers
     end
 
     def time_at(key, time)
-      @condition_timers << Tasker.at(time) { temporary_condition_met(key) }
+      condition_timers << Tasker.at(time) { temporary_condition_met(key) }
     end
 
     def time_cron(key, cron)
-      @condition_timers << Tasker.cron(cron) { temporary_condition_met(key) }
+      condition_timers << Tasker.cron(cron) { temporary_condition_met(key) }
     end
 
     def temporary_condition_met(key : String)
-      if timer = @debounce_timers[key]?
-        timer.cancel
-      end
+      # Cancel old debounce timer
+      debounce_timers.delete(key).try &.cancel
 
       # Revert the status of this condition
-      @debounce_timers[key] = Tasker.in(@debounce_period) do
-        @debounce_timers.delete key
-        @conditions_met[key] = false
+      debounce_timers[key] = Tasker.in(debounce_period) do
+        debounce_timers.delete key
+        conditions_met[key] = false
         update_state(false)
       end
 
       # Update status of this condition
-      @conditions_met[key] = true
+      conditions_met[key] = true
+
       check_trigger!
     end
   end
