@@ -45,17 +45,3 @@ Spec.after_suite do
     end
   end
 end
-
-# Models
-#################################################################
-
-# Pretty prints document errors
-def inspect_error(error : RethinkORM::Error::DocumentInvalid)
-  errors = error.model.errors.map do |e|
-    {
-      field:   e.field,
-      message: e.message,
-    }
-  end
-  pp! errors
-end
