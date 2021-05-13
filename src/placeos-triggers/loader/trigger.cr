@@ -10,16 +10,10 @@ module PlaceOS::Triggers::Loader
     end
 
     def process_resource(action : Resource::Action, resource trigger : Model::Trigger) : Resource::Result
-      trigger_id = trigger.id.as(String)
       case action
-      in .deleted?
-        mapping.delete_trigger(trigger_id)
-      in .created?
-        mapping.with_cache do |cache|
-          cache[trigger_id] = trigger
-        end
-      in .updated?
-        mapping.update_trigger(trigger)
+      in .created? then mapping.new_trigger(trigger)
+      in .deleted? then mapping.remove_trigger(trigger)
+      in .updated? then mapping.update_trigger(trigger)
       end
 
       Resource::Result::Success
