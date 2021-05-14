@@ -80,7 +80,6 @@ module PlaceOS::Triggers
 
       trigger.conditions.try &.comparisons = [compare, compare2]
       trigger.conditions_will_change!
-      trigger.save!
 
       trigger_loader.process_resource(:updated, trigger)
 
@@ -113,7 +112,6 @@ module PlaceOS::Triggers
 
       trigger.actions.try &.functions = [func]
       trigger.actions_will_change!
-      trigger.save!
 
       trigger_loader.process_resource(:created, trigger).success?.should be_true
 
@@ -196,8 +194,6 @@ module PlaceOS::Triggers
 
       trigger.conditions.try &.comparisons = [compare, compare2]
       trigger.conditions_will_change!
-      trigger.save!
-      trigger.conditions_will_change!
 
       trigger_loader.process_resource(:updated, trigger).success?.should be_true
 
@@ -233,8 +229,6 @@ module PlaceOS::Triggers
         .to_return(body: "null")
 
       trigger.actions.try &.functions = [func]
-      trigger.actions_will_change!
-      trigger.save!
       trigger.actions_will_change!
 
       trigger_loader.process_resource(:updated, trigger).success?.should be_true
