@@ -5,7 +5,7 @@
 
 PlaceOS service handling events and conditional triggers.
 
-## EVN Vars
+## Environment Variables
 
 * `SG_ENV` = set to `production` for production log levels
 * `SMTP_SERVER` = hostname of the SMTP server for sending emails. i.e. smtp.example.com
