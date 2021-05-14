@@ -15,7 +15,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crystal:
+          - latest
+          - nightly
+          - 1.0.0
     steps:
       - uses: actions/checkout@v2
       - name: Run docker-compose test environment
         run: ./test
+        env:
+          CRYSTAL_VERSION: ${{ matrix.crystal }}
