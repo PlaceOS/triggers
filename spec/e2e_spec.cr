@@ -101,7 +101,7 @@ module PlaceOS::Triggers
 
       # ensure module metadata exists
       meta = PlaceOS::Driver::DriverModel::Metadata.new({
-        "start" => {} of String => Array(JSON::Any),
+        "start" => {} of String => JSON::Any,
       }, ["Functoids"])
       redis.set("interface/#{module_id}", meta.to_json)
 
@@ -219,7 +219,7 @@ module PlaceOS::Triggers
 
       # ensure module metadata exists
       meta = PlaceOS::Driver::DriverModel::Metadata.new({
-        "start" => {} of String => Array(JSON::Any),
+        "start" => {} of String => JSON::Any,
       }, ["Functoids"])
       redis.set("interface/#{module_id}", meta.to_json)
 

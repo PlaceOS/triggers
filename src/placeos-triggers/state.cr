@@ -77,7 +77,7 @@ module PlaceOS::Triggers
 
         case time.type
         in .at?   then time_at(condition_key, time.time.not_nil!)
-        in .cron? then time_cron(condition_key, time.cron.not_nil!)
+        in .cron? then time_cron(condition_key, time.cron.not_nil!, time.timezone)
         end
       end
 
@@ -260,8 +260,9 @@ module PlaceOS::Triggers
       condition_timers << Tasker.at(time) { temporary_condition_met(key) }
     end
 
-    def time_cron(key, cron)
-      condition_timers << Tasker.cron(cron) { temporary_condition_met(key) }
+    def time_cron(key, cron, timezone)
+      location = timezone ? Time::Location.load(timezone) : Time::Location.local
+      condition_timers << Tasker.cron(cron, location) { temporary_condition_met(key) }
     end
 
     def temporary_condition_met(key : String)
