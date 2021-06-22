@@ -17,7 +17,8 @@ COPY ./src /app/src
 
 # Build application
 ENV UNAME_AT_COMPILE_TIME=true
-RUN crystal build --release --debug --error-trace /app/src/app.cr -o triggers
+RUN PLACE_COMMIT=$PLACE_COMMIT \
+    crystal build --release --debug --error-trace /app/src/app.cr -o triggers
 
 # Extract dependencies
 RUN ldd /app/triggers | tr -s '[:blank:]' '\n' | grep '^/' | \

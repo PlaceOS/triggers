@@ -6,6 +6,9 @@ require "webmock"
 require "rethinkdb-orm"
 
 require "placeos-models/spec/generator"
+require "../lib/action-controller/spec/curl_context"
+require "../src/constants.cr"
+require "placeos-models/version"
 
 # Prepare for node discovery
 WebMock.stub(:post, "http://127.0.0.1:2379/v3beta/kv/range")
@@ -22,6 +25,12 @@ WebMock.stub(:post, "http://127.0.0.1:2379/v3beta/kv/range")
 WebMock.stub(:post, "http://127.0.0.1:2379/v3beta/watch")
   .with(body: "{\"create_request\":{\"key\":\"c2VydmljZS9jb3Jl\",\"range_end\":\"c2VydmljZS9jb3Jm\"}}", headers: {"Content-Type" => "application/json"})
   .to_return(body_io: IO::Stapled.new(*IO.pipe))
+
+WebMock.stub(:get, "http://localhost:6000/api/triggers/v2/version")
+  .to_return(body: "{\"service\":\"#{PlaceOS::Triggers::APP_NAME}\",\"commit\":\"#{PlaceOS::Triggers::BUILD_COMMIT}\",\"version\":\"#{PlaceOS::Triggers::VERSION}\",\"build_time\":\"#{PlaceOS::Triggers::BUILD_TIME}\",\"platform_version\":\"DEV\"}".to_s)
+
+WebMock.stub(:get, "http://localhost:6000/api/triggers/v2/")
+  .to_return(body: "{\"service\":\"#{PlaceOS::Triggers::APP_NAME}\",\"commit\":\"#{PlaceOS::Triggers::BUILD_COMMIT}\",\"version\":\"#{PlaceOS::Triggers::VERSION}\",\"build_time\":\"#{PlaceOS::Triggers::BUILD_TIME}\",\"platform_version\":\"DEV\"}".to_s)
 
 require "../src/config"
 

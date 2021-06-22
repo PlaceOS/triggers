@@ -6,7 +6,7 @@ require "./constants"
 
 # Logging configuration
 module PlaceOS::Triggers::Logging
-  ::Log.progname = NAME
+  ::Log.progname = APP_NAME
 
   standard_sentry = Raven::LogBackend.new
   comprehensive_sentry = Raven::LogBackend.new(capture_all: true)

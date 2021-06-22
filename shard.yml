@@ -29,7 +29,7 @@ dependencies:
   # Models
   placeos-models:
     github: placeos/models
-    version: ~> 5.0
+    version: ~> 5.3
 
   # Log Backend
   placeos-log-backend:

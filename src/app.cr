@@ -10,7 +10,7 @@ process_count = PlaceOS::Triggers::DEFAULT_PROCESS_COUNT
 
 # Command line options
 OptionParser.parse(ARGV.dup) do |parser|
-  parser.banner = "Usage: #{PlaceOS::Triggers::NAME} [arguments]"
+  parser.banner = "Usage: #{PlaceOS::Triggers::APP_NAME} [arguments]"
 
   parser.on("-b HOST", "--bind=HOST", "Specifies the server host") { |h| host = h }
   parser.on("-p PORT", "--port=PORT", "Specifies the server port") { |p| port = p.to_i }
@@ -25,7 +25,7 @@ OptionParser.parse(ARGV.dup) do |parser|
   end
 
   parser.on("-v", "--version", "Display the application version") do
-    puts "#{PlaceOS::Triggers::NAME} v#{PlaceOS::Triggers::VERSION}"
+    puts "#{PlaceOS::Triggers::APP_NAME} v#{PlaceOS::Triggers::VERSION}"
     exit 0
   end
 
@@ -51,7 +51,7 @@ end
 require "./config"
 
 module PlaceOS::Triggers
-  Log.info { "launching #{NAME} v#{VERSION}" }
+  Log.info { "launching #{APP_NAME} v#{VERSION}" }
 
   server = ActionController::Server.new(port, host)
 
@@ -81,5 +81,5 @@ module PlaceOS::Triggers
   end
 
   # Shutdown message
-  Log.info { "#{NAME} leaps through the veldt" }
+  Log.info { "#{APP_NAME} leaps through the veldt" }
 end
