@@ -1,7 +1,7 @@
 require "placeos-models/version"
 
 module PlaceOS::Triggers
-  class Admin < Application
+  class Root < Application
     base "/api/triggers/v2/"
 
     get "/", :root do

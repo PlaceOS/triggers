@@ -17,7 +17,6 @@ COPY shard.yml /app
 COPY shard.override.yml /app
 COPY shard.lock /app
 
-RUN shards update --ignore-crystal-version
 RUN shards install --ignore-crystal-version
 
 COPY scripts/* /app/scripts/
