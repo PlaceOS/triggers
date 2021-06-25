@@ -40,6 +40,8 @@ Spec.before_suite do
   end
 end
 
+Spec.before_each &->WebMock.reset
+
 # Clear test tables on exit
 Spec.after_suite do
   RethinkORM::Connection.raw do |q|
