@@ -1,11 +1,14 @@
 require "secrets-env"
 
 module PlaceOS::Triggers
-  NAME    = "triggers"
-  VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
+  APP_NAME = "triggers"
+  VERSION  = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
 
   Log         = ::Log.for(self)
   ENVIRONMENT = ENV["SG_ENV"]?.presence || "development"
+
+  BUILD_TIME   = {{ system("date -u").stringify.chomp }}
+  BUILD_COMMIT = {{ env("PLACE_COMMIT") || "DEV" }}
 
   DEFAULT_PORT          = (ENV["SG_SERVER_PORT"]? || 3000).to_i
   DEFAULT_HOST          = ENV["SG_SERVER_HOST"]? || "127.0.0.1"

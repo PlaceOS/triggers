@@ -1,4 +1,6 @@
 FROM crystallang/crystal:1.0.0-alpine
+ARG PLACE_COMMIT="DEV"
+ARG PLACE_VERSION="DEV"
 
 WORKDIR /app
 
@@ -17,7 +19,9 @@ COPY ./src /app/src
 
 # Build application
 ENV UNAME_AT_COMPILE_TIME=true
-RUN crystal build --release --debug --error-trace /app/src/app.cr -o triggers
+RUN PLACE_COMMIT=$PLACE_COMMIT \
+    PLACE_VERSION=$PLACE_VERSION \
+    crystal build --release --debug --error-trace /app/src/app.cr -o triggers
 
 # Extract dependencies
 RUN ldd /app/triggers | tr -s '[:blank:]' '\n' | grep '^/' | \

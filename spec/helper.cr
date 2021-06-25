@@ -6,6 +6,9 @@ require "webmock"
 require "rethinkdb-orm"
 
 require "placeos-models/spec/generator"
+require "../lib/action-controller/spec/curl_context"
+require "../src/constants.cr"
+require "placeos-models/version"
 
 # Prepare for node discovery
 WebMock.stub(:post, "http://127.0.0.1:2379/v3beta/kv/range")
@@ -36,6 +39,8 @@ Spec.before_suite do
     settings.db = db_name
   end
 end
+
+Spec.before_each &->WebMock.reset
 
 # Clear test tables on exit
 Spec.after_suite do
