@@ -107,7 +107,7 @@ shards:
 
   openssl_ext:
     git: https://github.com/spider-gazelle/openssl_ext.git
-    version: 2.1.4
+    version: 2.1.5
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
@@ -117,9 +117,9 @@ shards:
     git: https://github.com/place-labs/log-backend.git
     version: 0.4.0
 
-  placeos-models: # Overridden
+  placeos-models:
     git: https://github.com/placeos/models.git
-    version: 5.1.1
+    version: 5.5.1
 
   placeos-resource:
     git: https://github.com/place-labs/resource.git
