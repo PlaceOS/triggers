@@ -164,8 +164,10 @@ module PlaceOS::Triggers
 
       publish_state
 
+      system_id = instance.control_system_id.not_nil!
+
       Log.info { {
-        system_id: instance.control_system_id,
+        system_id: system_id,
         trigger:   instance.trigger_id,
         instance:  instance.id,
         message:   "state changed to #{triggered}",
@@ -174,48 +176,31 @@ module PlaceOS::Triggers
       # Check if we should run the actions
       return unless triggered
 
-      system_id = instance.control_system_id.not_nil!
-
       # Perform actions
       trigger.actions.functions.each_with_index do |action, function_index|
         modname, index = PlaceOS::Driver::Proxy::RemoteDriver.get_parts(action.mod)
         request_id = "action_#{function_index}_#{Time.utc.to_unix_ms}"
 
-        Log.debug { {
-          system_id:  system_id,
-          module:     modname,
-          index:      index,
-          method:     action.method,
-          request_id: request_id,
-          trigger:    instance.trigger_id,
-          instance:   instance.id,
-          message:    "performing exec for trigger '#{trigger.name}'",
-        } }
+        ::Log.with_context do
+          Log.context.set(system_id: system_id, module: modname, index: index, method: action.method, request_id: request_id, trigger: instance.trigger_id, instance: instance.id)
+          Log.debug { "performing exec for trigger '#{trigger.name}'" }
 
-        begin
-          PlaceOS::Driver::Proxy::RemoteDriver.new(
-            system_id,
-            modname,
-            index,
-            PlaceOS::Triggers.discovery
-          ).exec(
-            PlaceOS::Driver::Proxy::RemoteDriver::Clearance::Admin,
-            action.method,
-            named_args: action.args,
-            request_id: request_id
-          )
-        rescue error
-          Log.error(exception: error) { {
-            system_id:  system_id,
-            module:     modname,
-            index:      index,
-            method:     action.method,
-            request_id: request_id,
-            trigger:    instance.trigger_id,
-            instance:   instance.id,
-            message:    "exec failed for trigger '#{trigger.name}'",
-          } }
-          increment_action_error
+          begin
+            PlaceOS::Driver::Proxy::RemoteDriver.new(
+              system_id,
+              modname,
+              index,
+              PlaceOS::Triggers.discovery
+            ).exec(
+              PlaceOS::Driver::Proxy::RemoteDriver::Clearance::Admin,
+              action.method,
+              named_args: action.args,
+              request_id: request_id
+            )
+          rescue error
+            Log.error(exception: error) { "exec failed for trigger '#{trigger.name}'" }
+            increment_action_error
+          end
         end
       end
 
