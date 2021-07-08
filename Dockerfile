@@ -5,7 +5,8 @@ ARG PLACE_VERSION="DEV"
 WORKDIR /app
 
 # Add trusted CAs for communicating with external services
-RUN apk add --no-cache ca-certificates tzdata && update-ca-certificates
+RUN apk add --update --no-cache ca-certificates
+RUN update-ca-certificates
 
 # Install shards for caching
 COPY shard.yml shard.yml
