@@ -65,5 +65,5 @@ USER appuser:appuser
 
 # Run the app binding on port 3000
 EXPOSE 3000
-HEALTHCHECK CMD ["/triggers", "-c", "http://127.0.0.1:3000/"]
+HEALTHCHECK CMD ["/triggers", "-c", "http://127.0.0.1:3000/api/triggers/v2/"]
 CMD ["/triggers", "-b", "0.0.0.0", "-p", "3000"]
