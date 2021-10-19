@@ -38,6 +38,7 @@ dependencies:
   # PlaceOS Telemetry
   placeos-pulse:
     github: placeos/pulse
+    version: ~> 0.10
 
   # Abstraction over changes
   placeos-resource:
