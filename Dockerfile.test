@@ -7,9 +7,11 @@ ARG PLACE_COMMIT="DEV"
 
 # - Add trusted CAs for communicating with external services
 # - Add watchexec for running tests on change
-RUN apk add --no-cache \
+RUN apk add --update --no-cache \
         bash \
         ca-certificates \
+        libsodium \
+        openssl \
     && \
     apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing \
         watchexec \
@@ -20,7 +22,18 @@ COPY shard.yml /app
 COPY shard.override.yml /app
 COPY shard.lock /app
 
-RUN shards install --ignore-crystal-version
+# hadolint ignore=DL3003
+RUN shards install \
+        --ignore-crystal-version \
+        --skip-postinstall \
+        --skip-executables \
+    && \
+    ( \
+        cd lib/sodium \
+        && \
+        PKG_CONFIG_PATH=$(which pkg-config) \
+        bash build/libsodium_install.sh \
+    )
 
 COPY scripts /app/scripts
 

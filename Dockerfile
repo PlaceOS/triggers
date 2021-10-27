@@ -7,14 +7,34 @@ ARG PLACE_VERSION="DEV"
 WORKDIR /app
 
 # Add trusted CAs for communicating with external services
-RUN apk add --no-cache ca-certificates && update-ca-certificates
+RUN apk add --update --no-cache \
+        bash \
+        ca-certificates \
+        'libcurl>=7.79.1-r0' \
+        libsodium \
+        openssh \
+        openssl \
+    && \
+    update-ca-certificates
 
 # Install shards for caching
 COPY shard.yml shard.yml
 COPY shard.override.yml shard.override.yml
 COPY shard.lock shard.lock
 
-RUN shards install --production --ignore-crystal-version
+# hadolint ignore=DL3003
+RUN shards install \
+        --production \
+        --ignore-crystal-version \
+        --skip-postinstall \
+        --skip-executables \
+    && \
+    ( \
+        cd lib/sodium \
+        && \
+        PKG_CONFIG_PATH=$(which pkg-config) \
+        bash build/libsodium_install.sh \
+    )
 
 # Add src
 COPY ./src /app/src
@@ -24,6 +44,8 @@ ENV UNAME_AT_COMPILE_TIME=true
 RUN PLACE_COMMIT=$PLACE_COMMIT \
     PLACE_VERSION=$PLACE_VERSION \
     crystal build --release --debug --error-trace /app/src/app.cr -o triggers
+
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 
 # Extract dependencies
 RUN ldd /app/triggers | tr -s '[:blank:]' '\n' | grep '^/' | \
