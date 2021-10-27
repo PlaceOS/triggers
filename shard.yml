@@ -1,5 +1,5 @@
 name: placeos-triggers
-version: 1.2.1
+version: 1.3.0
 
 targets:
   triggers:
@@ -35,6 +35,11 @@ dependencies:
   placeos-log-backend:
     github: place-labs/log-backend
 
+  # PlaceOS Telemetry
+  placeos-pulse:
+    github: placeos/pulse
+    version: ~> 0.10
+
   # Abstraction over changes
   placeos-resource:
     github: place-labs/resource
@@ -46,9 +51,9 @@ dependencies:
     branch: master
 
   secrets-env:
-    github: place-labs/secrets-env
+    github: spider-gazelle/secrets-env
 
-  # timers / scheduling
+  # Timers / Scheduling
   tasker:
     github: spider-gazelle/tasker
 

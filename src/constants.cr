@@ -1,4 +1,5 @@
 require "secrets-env"
+require "hound-dog"
 
 module PlaceOS::Triggers
   APP_NAME = "triggers"
@@ -20,6 +21,10 @@ module PlaceOS::Triggers
   SMTP_PASS   = ENV["SMTP_PASS"]? || ""
   SMTP_SECURE = ENV["SMTP_SECURE"]? || ""
 
+  PULSE_ENABLED              = self.boolean_environment("PLACE_PULSE_ENABLED")
+  PLACE_DOMAIN               = ENV["PLACE_DOMAIN"]?.presence
+  PLACE_PULSE_INSTANCE_EMAIL = ENV["PLACE_PULSE_INSTANCE_EMAIL"]?.presence
+
   # HoundDog Configuration.
   # ----------------------------------
   # ETCD_HOST (default: "127.0.0.1")
@@ -29,6 +34,11 @@ module PlaceOS::Triggers
   CORE_NAMESPACE = "core"
 
   class_getter discovery : HoundDog::Discovery { HoundDog::Discovery.new(CORE_NAMESPACE) }
-  class_getter? smtp_authenticated : Bool = !SMTP_USER.empty?
   class_getter? production : Bool = ENVIRONMENT.downcase == "production"
+  class_getter? pulse_enabled : Bool = PULSE_ENABLED
+  class_getter? smtp_authenticated : Bool = !SMTP_USER.empty?
+
+  def self.boolean_environment(key) : Bool
+    !!ENV[key]?.presence.try(&.downcase.in?("1", "true"))
+  end
 end

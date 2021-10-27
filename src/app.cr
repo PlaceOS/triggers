@@ -75,6 +75,9 @@ module PlaceOS::Triggers
   # Start watching trigger instance table
   trigger_instance_loader = Loader::TriggerInstance.new(self.mapping).start
 
+  # Start telemetry
+  PlaceOS::Triggers.start_pulse
+
   # Start the server
   server.run do
     Log.info { "listening on #{server.print_addresses}" }

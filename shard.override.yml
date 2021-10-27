@@ -1,3 +1,6 @@
 dependencies:
   retriable:
     github: Sija/retriable.cr
+  sodium:
+    github: place-labs/sodium.cr
+    branch: fix/aead-chalsa-signature
