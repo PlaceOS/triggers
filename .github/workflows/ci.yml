@@ -6,3 +6,13 @@ jobs:
 
   crystal-style:
     uses: PlaceOS/.github/.github/workflows/crystal-style.yml@main
+
+  dockerfile-style:
+    name: Lint Dockerfile
+    uses: PlaceOS/.github/.github/workflows/dockerfile-style.yml@main
+
+  dockerfile-test-style:
+    name: Lint Dockerfile.test
+    uses: PlaceOS/.github/.github/workflows/dockerfile-style.yml@main
+    with:
+      dockerfile: Dockerfile.test
