@@ -143,7 +143,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 5.13.0
+    version: 5.14.0
 
   placeos-pulse:
     git: https://github.com/placeos/pulse.git
@@ -201,7 +201,7 @@ shards:
     git: https://github.com/spider-gazelle/simple_retry.git
     version: 1.1.1
 
-  sodium:
+  sodium: # Overridden
     git: https://github.com/place-labs/sodium.cr.git
     version: 1.2.3+git.commit.f8e12cd435b170d1b02797b9293bd5da4ba88b07
 
