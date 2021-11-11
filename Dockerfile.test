@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Layer libsodium and openssl (for Pulse)
 RUN apk add --update --no-cache \
+        libsodium-dev \
         libsodium \
         openssl
 
