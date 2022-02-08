@@ -1,6 +1,6 @@
 # PlaceOS Triggers
 
-[![Build Dev Image](https://github.com/PlaceOS/triggers/actions/workflows/build-dev-image.yml/badge.svg)](https://github.com/PlaceOS/triggers/actions/workflows/build-dev-image.yml)
+[![Build](https://github.com/PlaceOS/triggers/actions/workflows/build.yml/badge.svg)](https://github.com/PlaceOS/triggers/actions/workflows/build.yml)
 [![CI](https://github.com/PlaceOS/triggers/actions/workflows/ci.yml/badge.svg)](https://github.com/PlaceOS/triggers/actions/workflows/ci.yml)
 
 PlaceOS service handling events and conditional triggers.
