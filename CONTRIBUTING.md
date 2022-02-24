@@ -1,5 +1,7 @@
 # Contributing
 
+[PlaceOS](https://place.technology/) adheres to the [Contributor Covenent Code of Conduct](./CODE_OF_CONDUCT.md).
+
 ## Making Changes
 
 ### Pull Request Flow
@@ -11,7 +13,7 @@
 
 ### Commit Style
 
-PlaceOS uses [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
+[PlaceOS](https://place.technology/) uses [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 
 ## Testing
