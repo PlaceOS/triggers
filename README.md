@@ -3,7 +3,11 @@
 [![Build](https://github.com/PlaceOS/triggers/actions/workflows/build.yml/badge.svg)](https://github.com/PlaceOS/triggers/actions/workflows/build.yml)
 [![CI](https://github.com/PlaceOS/triggers/actions/workflows/ci.yml/badge.svg)](https://github.com/PlaceOS/triggers/actions/workflows/ci.yml)
 
-PlaceOS service handling events and conditional triggers.
+[PlaceOS](https://place.technology/) service handling events and conditional triggers.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## Environment Variables
 
@@ -14,22 +18,6 @@ PlaceOS service handling events and conditional triggers.
 * `SMTP_PASS` = password if required
 * `SMTP_SECURE` = left blank for clear text, `SMTPS` for a TLS connection, `STARTTLS` for negotiating TLS on an initial clear text connection
 * `REDIS_URL` = the redis connection string, defaults to `redis://localhost:6379`
-
-## Testing
-
-`crystal spec`
-
-## Compiling
-
-`shards build`
-
-## Deploying
-
-Once compiled you are left with a binary `triggers`
-
-* for help `./triggers --help`
-* viewing routes `./triggers --routes`
-* run on a different port or host `./triggers -b 0.0.0.0 -p 80`
 
 ## Bindings
 
