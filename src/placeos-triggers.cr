@@ -23,13 +23,13 @@ module PlaceOS::Triggers
       return
     end
 
-    if PlaceOS::Pulse.saas?
+    if Pulse.saas?
       instance_api_key = begin
         Model::ApiKey.saas_api_key(
           instance_domain: domain,
           instance_email: email,
         )
-      rescue error : PlaceOS::Model::SaasKeyError
+      rescue error : Model::Error::InvalidSaasKey
         Log.error(exception: error) { "failed to fetch the saas key for the instance" }
         raise error
       end
