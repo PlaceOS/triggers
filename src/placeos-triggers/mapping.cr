@@ -3,7 +3,6 @@ require "./state"
 module PlaceOS::Triggers
   class Mapping
     private getter mapping_lock = Mutex.new(protection: :reentrant)
-
     private getter trigger_cache = {} of String => Model::Trigger
     private getter trigger_state = Hash(String, Array(State)).new { |hash, key| hash[key] = [] of State }
     private getter trigger_instance_state = {} of String => State
@@ -15,21 +14,29 @@ module PlaceOS::Triggers
     # Instances
     ###############################################################################################
 
-    def new_instance(instance : Model::TriggerInstance)
+    {% for verb in %w(add update remove) %}
+      def {{ verb.id }}(model : Model::TriggerInstance | Model::Trigger)
+        case model
+        in Model::TriggerInstance then {{ verb.id }}_instance(model)
+        in Model::Trigger         then {{ verb.id }}_trigger(model)
+        end
+      end
+    {% end %}
+
+    def add_instance(instance : Model::TriggerInstance)
       mapping_lock.synchronize do
         trigger_id = instance.trigger_id.as(String)
         trigger = trigger_cache[trigger_id]?
 
         if trigger.nil?
-          trigger = instance.trigger.not_nil!
-          trigger_cache[trigger_id] = trigger
+          trigger = trigger_cache[trigger_id] = instance.trigger.not_nil!
         end
 
-        new_instance(trigger, instance)
+        add_instance(trigger, instance)
       end
     end
 
-    def new_instance(trigger : Model::Trigger, instance : Model::TriggerInstance)
+    def add_instance(trigger : Model::Trigger, instance : Model::TriggerInstance)
       mapping_lock.synchronize do
         State.new(trigger, instance).tap do |state|
           self.trigger_instance_state[instance.id.as(String)] = state
@@ -41,7 +48,7 @@ module PlaceOS::Triggers
     def update_instance(instance : Model::TriggerInstance)
       mapping_lock.synchronize do
         remove_instance(instance)
-        new_instance(instance)
+        add_instance(instance)
       end
     end
 
@@ -57,7 +64,7 @@ module PlaceOS::Triggers
     # Triggers
     ###############################################################################################
 
-    def new_trigger(trigger : Model::Trigger)
+    def add_trigger(trigger : Model::Trigger)
       mapping_lock.synchronize do
         trigger_cache[trigger.id.as(String)] = trigger
       end
@@ -72,7 +79,7 @@ module PlaceOS::Triggers
           self.trigger_instance_state.delete(instance.id)
           state.terminate!
 
-          new_instance(trigger, instance)
+          add_instance(trigger, instance)
         end
       end
     end
