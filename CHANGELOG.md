@@ -1,4 +1,19 @@
-## Unreleased
+## v1.3.1 (2022-03-01)
+
+### Fix
+
+- **pulse**: update for placeos-pulse 0.13.0 ([#23](https://github.com/PlaceOS/triggers/pull/23))
+- docker healthcheck
+- Dockerfile + specs
+- **logging**: set Log progname
+- **logging**: increase severity of messages to sentry
+- **config**: small typo
+- **mapping**: delete key for trigger in remove_instance
+- **app**: consistent logging on start-up
+- **spec**: with minor cleanups during investigation
+- **Dockerfile**: missing override yml
+- dev builds
+- minor typo
 
 ### Refactor
 
@@ -21,20 +36,6 @@
 - update service to use crystal 1.0.0
 - add logstash support
 - update to driver 3.6
-
-### Fix
-
-- docker healthcheck
-- Dockerfile + specs
-- **logging**: set Log progname
-- **logging**: increase severity of messages to sentry
-- **config**: small typo
-- **mapping**: delete key for trigger in remove_instance
-- **app**: consistent logging on start-up
-- **spec**: with minor cleanups during investigation
-- **Dockerfile**: missing override yml
-- dev builds
-- minor typo
 
 ## v1.1.2 (2020-09-09)
 
