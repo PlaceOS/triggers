@@ -1,4 +1,8 @@
-## Unreleased
+## v1.3.2 (2022-03-01)
+
+### Fix
+
+- bump placeos-pulse
 
 ## v1.3.1 (2022-03-01)
 
