@@ -151,7 +151,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 6.6.4
+    version: 6.6.5
 
   placeos-pulse:
     git: https://github.com/placeos/pulse.git
