@@ -155,7 +155,7 @@ shards:
 
   placeos-pulse:
     git: https://github.com/placeos/pulse.git
-    version: 0.13.0
+    version: 0.13.1
 
   placeos-resource:
     git: https://github.com/place-labs/resource.git
