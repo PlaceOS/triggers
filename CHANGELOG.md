@@ -1,3 +1,9 @@
+## v1.3.3 (2022-03-02)
+
+### Refactor
+
+- **loader**: DRY through abstract inheritance ([#24](https://github.com/PlaceOS/triggers/pull/24))
+
 ## v1.3.2 (2022-03-01)
 
 ### Fix
