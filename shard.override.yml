@@ -1,4 +1,6 @@
 dependencies:
+  pars:
+    github: spider-gazelle/pars
   retriable:
     github: Sija/retriable.cr
   sodium:
