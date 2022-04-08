@@ -1,4 +1,8 @@
-## Unreleased
+## v1.3.4 (2022-04-08)
+
+### Fix
+
+- bump placeos-models to 8.1.0 ([#27](https://github.com/PlaceOS/triggers/pull/27))
 
 ## v1.3.3 (2022-03-02)
 
