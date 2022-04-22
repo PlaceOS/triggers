@@ -7,7 +7,7 @@ shards:
 
   action-controller:
     git: https://github.com/spider-gazelle/action-controller.git
-    version: 4.8.0
+    version: 4.9.0
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
@@ -68,6 +68,10 @@ shards:
   etcd:
     git: https://github.com/place-labs/crystal-etcd.git
     version: 1.2.5
+
+  exception_page:
+    git: https://github.com/crystal-loot/exception_page.git
+    version: 0.3.0
 
   faker:
     git: https://github.com/askn/faker.git
@@ -147,7 +151,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 8.2.2
+    version: 8.2.8
 
   placeos-pulse:
     git: https://github.com/placeos/pulse.git
@@ -191,7 +195,7 @@ shards:
 
   rethinkdb-orm:
     git: https://github.com/spider-gazelle/rethinkdb-orm.git
-    version: 6.0.2
+    version: 6.0.4
 
   retriable: # Overridden
     git: https://github.com/sija/retriable.cr.git
