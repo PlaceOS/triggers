@@ -1,4 +1,8 @@
-## Unreleased
+## v1.4.0 (2022-04-26)
+
+### Feat
+
+- **logging**: add configuration by LOG_LEVEL env var
 
 ## v1.3.4 (2022-04-08)
 
