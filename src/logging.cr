@@ -16,17 +16,24 @@ module PlaceOS::Triggers::Logging
   log_level = Triggers.production? ? ::Log::Severity::Info : ::Log::Severity::Debug
   namespaces = ["action-controller.*", "place_os.*", "e_mail.*"]
 
-  ::Log.setup do |config|
-    config.bind "*", :warn, log_backend
+  builder = ::Log.builder
+  builder.bind "*", log_level, log_backend
+  builder.bind "raven", :warn, log_backend
 
-    namespaces.each do |namespace|
-      config.bind namespace, log_level, log_backend
+  namespaces.each do |namespace|
+    builder.bind namespace, log_level, log_backend
 
-      # Bind raven's backend
-      config.bind namespace, :warn, standard_sentry
-      config.bind namespace, :error, comprehensive_sentry
-    end
+    # Bind raven's backend
+    builder.bind namespace, :info, standard_sentry
+    builder.bind namespace, :warn, comprehensive_sentry
   end
+
+  ::Log.setup_from_env(
+    default_level: log_level,
+    builder: builder,
+    backend: log_backend,
+    log_level_env: "LOG_LEVEL",
+  )
 
   # Configure Sentry
   Raven.configure &.async=(true)
