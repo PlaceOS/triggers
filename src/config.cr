@@ -16,6 +16,9 @@ require "./controllers/application"
 require "./controllers/*"
 require "./placeos-triggers"
 
+# Require telemetry after application code
+require "./telemetry"
+
 # Server required after application controllers
 require "action-controller/server"
 
