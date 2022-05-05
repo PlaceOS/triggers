@@ -6,6 +6,3 @@ dependencies:
   sodium:
     github: place-labs/sodium.cr
     branch: fix/aead-chalsa-signature
-  opentelemetry-api:
-    github: place-labs/opentelemetry-api.cr
-    branch: fix/trace/in_span
