@@ -35,7 +35,7 @@ dependencies:
   # Log Backend
   placeos-log-backend:
     github: place-labs/log-backend
-    version: ">= 0.8.13"
+    version: ">= 0.11.0"
 
   # PlaceOS Telemetry
   placeos-pulse:
