@@ -5,8 +5,9 @@ require "random"
 require "webmock"
 require "rethinkdb-orm"
 
+require "action-controller/spec_helper"
+
 require "placeos-models/spec/generator"
-require "../lib/action-controller/spec/curl_context"
 require "../src/constants.cr"
 require "placeos-models/version"
 
@@ -50,3 +51,14 @@ Spec.after_suite do
     end
   end
 end
+
+module PlaceOS::Api::SpecClient
+  # Can't use ivars at top level, hence this hack
+  private CLIENT = ActionController::SpecHelper.client
+
+  def client
+    CLIENT
+  end
+end
+
+include PlaceOS::Api::SpecClient
