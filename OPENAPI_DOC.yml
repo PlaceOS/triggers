@@ -1,0 +1,229 @@
+---
+openapi: 3.0.3
+info:
+  description: PlaceOS Triggers service
+  title: triggers
+  version: 1.6.0
+paths:
+  /api/triggers/v2:
+    get:
+      summary: used to check service is responding
+      tags:
+      - Root
+      operationId: PlaceOS::Triggers::Root#healthcheck
+      parameters: []
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__CommonError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__CommonError'
+        406:
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ContentError'
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ContentError'
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ParameterError'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ParameterError'
+  /api/triggers/v2/version:
+    get:
+      summary: returns the service commit level and build time
+      tags:
+      - Root
+      operationId: PlaceOS::Triggers::Root#version
+      parameters: []
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceOS__Model__Version'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__CommonError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__CommonError'
+        406:
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ContentError'
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ContentError'
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ParameterError'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ParameterError'
+  /api/triggers/v2/webhook/{id}:
+    post:
+      summary: Informs the service that a webhook has been performed
+      description: 'Informs the service that a webhook has been performed
+
+        Return 204 if the state isn''t loaded, 202 on success'
+      tags:
+      - Webhook
+      operationId: PlaceOS::Triggers::Api::Webhook#create
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: secret
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        202:
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/String'
+        204:
+          description: No Content
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__CommonError'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__CommonError'
+        406:
+          description: Not Acceptable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ContentError'
+        415:
+          description: Unsupported Media Type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ContentError'
+        422:
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ParameterError'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application__ParameterError'
+components:
+  schemas:
+    PlaceOS__Model__Version:
+      type: object
+      properties:
+        service:
+          type: string
+        commit:
+          type: string
+        version:
+          type: string
+        build_time:
+          type: string
+        platform_version:
+          type: string
+      required:
+      - service
+      - commit
+      - version
+      - build_time
+      - platform_version
+    String:
+      type: string
+    Application__CommonError:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+        backtrace:
+          type: array
+          items:
+            type: string
+          nullable: true
+    Application__ContentError:
+      type: object
+      properties:
+        error:
+          type: string
+        accepts:
+          type: array
+          items:
+            type: string
+          nullable: true
+      required:
+      - error
+      description: Provides details on available data formats
+    Application__ParameterError:
+      type: object
+      properties:
+        error:
+          type: string
+        parameter:
+          type: string
+          nullable: true
+        restriction:
+          type: string
+          nullable: true
+      required:
+      - error
+      description: Provides details on which parameter is missing or invalid

@@ -3,7 +3,9 @@ require "hound-dog"
 
 module PlaceOS::Triggers
   APP_NAME = "triggers"
-  VERSION  = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
+  {% begin %}
+    VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
+  {% end %}
 
   Log         = ::Log.for(self)
   ENVIRONMENT = ENV["SG_ENV"]?.presence || "development"

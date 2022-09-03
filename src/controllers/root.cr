@@ -4,12 +4,15 @@ module PlaceOS::Triggers
   class Root < Application
     base "/api/triggers/v2/"
 
-    get "/", :root do
-      head :ok
+    # used to check service is responding
+    @[AC::Route::GET("/")]
+    def healthcheck : Nil
     end
 
-    get "/version", :version do
-      render :ok, json: PlaceOS::Model::Version.new(
+    # returns the service commit level and build time
+    @[AC::Route::GET("/version")]
+    def version : PlaceOS::Model::Version
+      PlaceOS::Model::Version.new(
         version: VERSION,
         build_time: BUILD_TIME,
         commit: BUILD_COMMIT,
