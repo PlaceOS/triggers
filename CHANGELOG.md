@@ -1,4 +1,8 @@
-## Unreleased
+## v1.6.0 (2022-09-03)
+
+### Feat
+
+- add ARM support ([#34](https://github.com/PlaceOS/triggers/pull/34))
 
 ## v1.5.3 (2022-05-03)
 
@@ -50,6 +54,17 @@
 
 ## v1.3.1 (2022-03-01)
 
+### Feat
+
+- **pulse**: add telemetry to triggers service ([#17](https://github.com/PlaceOS/triggers/pull/17))
+- conform to PlaceOS::Model::Version
+- add support for timezones in crons
+- **mapping**: add `state_for?`
+- use placeos log backend
+- update service to use crystal 1.0.0
+- add logstash support
+- update to driver 3.6
+
 ### Fix
 
 - **pulse**: update for placeos-pulse 0.13.0 ([#23](https://github.com/PlaceOS/triggers/pull/23))
@@ -74,18 +89,6 @@
 - **mapping**: simplify api
 - **state**: cleanup
 - use placeos-resource
-
-### Feat
-
-- **pulse**: add telemetry to triggers service ([#17](https://github.com/PlaceOS/triggers/pull/17))
-- conform to PlaceOS::Model::Version
-- conform to PlaceOS::Model::Version
-- add support for timezones in crons
-- **mapping**: add `state_for?`
-- use placeos log backend
-- update service to use crystal 1.0.0
-- add logstash support
-- update to driver 3.6
 
 ## v1.1.2 (2020-09-09)
 
