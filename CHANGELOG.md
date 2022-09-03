@@ -1,3 +1,9 @@
+## v1.7.0 (2022-09-03)
+
+### Feat
+
+- update to be self documenting ([#35](https://github.com/PlaceOS/triggers/pull/35))
+
 ## v1.6.0 (2022-09-03)
 
 ### Feat
