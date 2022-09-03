@@ -1,62 +1,18 @@
-ARG CRYSTAL_VERSION=1.3.2
-FROM crystallang/crystal:${CRYSTAL_VERSION}-alpine as build
-
-ARG PLACE_COMMIT="DEV"
-ARG PLACE_VERSION="DEV"
-
+ARG CRYSTAL_VERSION=1.5.0
+FROM alpine:3.16 as build
 WORKDIR /app
 
-# Add trusted CAs for communicating with external services
-RUN apk add --update --no-cache \
-        bash \
-        ca-certificates \
-        'libcurl>=7.79.1-r0' \
-        libsodium \
-        openssh \
-        openssl \
-    && \
-    update-ca-certificates
-
-# Install shards for caching
-COPY shard.yml shard.yml
-COPY shard.override.yml shard.override.yml
-COPY shard.lock shard.lock
-
-# hadolint ignore=DL3003
-RUN shards install \
-        --production \
-        --ignore-crystal-version \
-        --skip-postinstall \
-        --skip-executables \
-    && \
-    ( \
-        cd lib/sodium \
-        && \
-        PKG_CONFIG_PATH=$(which pkg-config) \
-        bash build/libsodium_install.sh \
-    )
-
-# Add src
-COPY ./src /app/src
-
-# Build application
-ENV UNAME_AT_COMPILE_TIME=true
-RUN PLACE_COMMIT=$PLACE_COMMIT \
-    PLACE_VERSION=$PLACE_VERSION \
-    crystal build --release --debug --error-trace /app/src/app.cr -o triggers
-
-SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-
-# Extract dependencies
-RUN ldd /app/triggers | tr -s '[:blank:]' '\n' | grep '^/' | \
-    xargs -I % sh -c 'mkdir -p $(dirname deps%); cp % deps%;'
+# Set the commit via a build arg
+ARG PLACE_COMMIT="DEV"
+# Set the platform version via a build arg
+ARG PLACE_VERSION="DEV"
 
 # Create a non-privileged user, defaults are appuser:10001
 ARG IMAGE_UID="10001"
 ENV UID=$IMAGE_UID
 ENV USER=appuser
 
-# See https://stackoverflow.com/a/55757473/12429735RUN
+# See https://stackoverflow.com/a/55757473/12429735
 RUN adduser \
     --disabled-password \
     --gecos "" \
@@ -66,11 +22,64 @@ RUN adduser \
     --uid "${UID}" \
     "${USER}"
 
+# Add trusted CAs for communicating with external services
+RUN apk add --no-cache \
+        ca-certificates \
+        curl \
+    && \
+    update-ca-certificates
+
+# Add crystal lang
+# can look up packages here: https://pkgs.alpinelinux.org/packages?name=crystal
+RUN apk add \
+  --update \
+  --no-cache \
+  --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main \
+  --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community \
+    crystal \
+    shards \
+    yaml-dev \
+    yaml-static \
+    libxml2-dev \
+    openssl-dev \
+    openssl-libs-static \
+    zlib-dev \
+    zlib-static \
+    tzdata
+
+# Install shards for caching
+COPY shard.yml shard.yml
+COPY shard.override.yml shard.override.yml
+COPY shard.lock shard.lock
+
+RUN shards install --production --ignore-crystal-version --skip-postinstall --skip-executables
+
+# Add src
+COPY ./src /app/src
+
+# Build application
+ENV UNAME_AT_COMPILE_TIME=true
+RUN PLACE_COMMIT=$PLACE_COMMIT \
+    PLACE_VERSION=$PLACE_VERSION \
+    crystal build \
+        --release \
+        --error-trace \
+        --static \
+        -o /app/triggers \
+        /app/src/app.cr
+
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+
 # Build a minimal docker image
 FROM scratch
 WORKDIR /
-COPY --from=build /app/deps /
-COPY --from=build /app/triggers /triggers
+ENV PATH=$PATH:/
+
+# Copy the user information over
+COPY --from=build etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+
+# These are required for communicating with external services
 COPY --from=build /etc/hosts /etc/hosts
 
 # These provide certificate chain validation where communicating with external services over TLS
@@ -80,9 +89,7 @@ ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 # This is required for Timezone support
 COPY --from=build /usr/share/zoneinfo/ /usr/share/zoneinfo/
 
-# Copy the user information over
-COPY --from=build /etc/passwd /etc/passwd
-COPY --from=build /etc/group /etc/group
+COPY --from=build /app/triggers /triggers
 
 # Use an unprivileged user.
 USER appuser:appuser
