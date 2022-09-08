@@ -1,3 +1,9 @@
+## v1.8.0 (2022-09-08)
+
+### Feat
+
+- **shards**: bump libs ([#37](https://github.com/PlaceOS/triggers/pull/37))
+
 ## v1.7.1 (2022-09-08)
 
 ### Fix
