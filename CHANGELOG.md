@@ -1,3 +1,9 @@
+## v1.7.1 (2022-09-08)
+
+### Fix
+
+- **Dockerfile**: revert static build ([#36](https://github.com/PlaceOS/triggers/pull/36))
+
 ## v1.7.0 (2022-09-03)
 
 ### Feat
