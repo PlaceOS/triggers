@@ -9,7 +9,7 @@ dependencies:
   # Web server
   action-controller:
     github: spider-gazelle/action-controller
-    version: ~> 5.1
+    version: ~> 5.3
 
   email:
     github: arcage/crystal-email
