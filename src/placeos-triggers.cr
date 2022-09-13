@@ -1,3 +1,4 @@
+require "simple_retry"
 require "placeos-pulse"
 require "placeos-models/api_key"
 
@@ -43,7 +44,18 @@ module PlaceOS::Triggers
 
   def self.start_pulse : Nil
     if client = pulse
-      client.start
+      spawn do
+        SimpleRetry.try_to(
+          retry_on: PlaceOS::Pulse::Error,
+          base_interval: 5.minutes,
+          max_interval: 1.hour
+        ) do |run_count, last_error|
+          if last_error
+            Log.warn(exception: last_error) { "error starting pulse client. Retry no.#{run_count}" }
+          end
+          client.start
+        end
+      end
     else
       Log.info { "pulse telemetry is not enabled for this instance" }
     end
