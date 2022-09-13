@@ -1,3 +1,9 @@
+## v1.9.0 (2022-09-13)
+
+### Feat
+
+- update pulse client ([#38](https://github.com/PlaceOS/triggers/pull/38))
+
 ## v1.8.0 (2022-09-08)
 
 ### Feat
