@@ -47,7 +47,7 @@ module PlaceOS::Triggers::Api
     # Return 204 if the state isn't loaded, 202 on success
     @[AC::Route::POST("/:id", status: {
       String => HTTP::Status::ACCEPTED,
-      Nil => HTTP::Status::NO_CONTENT,
+      Nil    => HTTP::Status::NO_CONTENT,
     })]
     def create : String?
       trig = trigger
