@@ -42,18 +42,10 @@ dependencies:
     github: placeos/pulse
     version: "~> 1.0"
 
-  # Abstraction over changes
-  placeos-resource:
-    github: place-labs/resource
-    version: ~> 2.0
-
   # Sentry integration
   raven:
     github: Sija/raven.cr
     branch: master
-
-  secrets-env:
-    github: spider-gazelle/secrets-env
 
   # Timers / Scheduling
   tasker:

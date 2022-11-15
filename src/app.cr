@@ -78,14 +78,34 @@ module PlaceOS::Triggers
   Signal::INT.trap &terminate
   Signal::TERM.trap &terminate
 
+  mapping = self.mapping
+
   # Start watching trigger table
-  trigger_loader = Loader::Trigger.new(self.mapping).start
+  spawn do
+    Model::Trigger.changes.each do |change|
+      model = change.value
+      case change.event
+      in .created? then mapping.add(model)
+      in .deleted? then mapping.remove(model)
+      in .updated? then mapping.update(model)
+      end
+    end
+  end
 
   # Start watching trigger instance table
-  trigger_instance_loader = Loader::TriggerInstance.new(self.mapping).start
+  spawn do
+    Model::TriggerInstance.changes.each do |change|
+      model = change.value
+      case change.event
+      in .created? then mapping.add(model)
+      in .deleted? then mapping.remove(model)
+      in .updated? then mapping.update(model)
+      end
+    end
+  end
 
   # Start telemetry
-  PlaceOS::Triggers.start_pulse
+  # PlaceOS::Triggers.start_pulse
 
   # Start the server
   server.run do

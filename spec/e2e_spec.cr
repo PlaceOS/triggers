@@ -46,7 +46,7 @@ module PlaceOS::Triggers
       instance_loader.process_resource(:created, inst)
 
       # create the status lookup structure
-      sys_id = inst.control_system_id.not_nil!
+      sys_id = inst.control_system_id
       storage = PlaceOS::Driver::RedisStorage.new(sys_id, "system")
       storage["Test/1"] = module_id
 
@@ -58,7 +58,7 @@ module PlaceOS::Triggers
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
 
       # Ensure the trigger hasn't fired
-      state = mappings.state_for?(inst).not_nil!
+      state = mappings.state_for?(inst)
       state.triggered.should be_false
 
       store[:state] = {on: true}.to_json
@@ -86,7 +86,7 @@ module PlaceOS::Triggers
       sleep 0.1
 
       # The state is replaced with a new state on update
-      state = mappings.state_for?(inst).not_nil!
+      state = mappings.state_for?(inst)
       state.triggered.should be_false
       store[:greeting] = "hello".to_json
 
@@ -116,7 +116,7 @@ module PlaceOS::Triggers
       trigger_loader.process_resource(:created, trigger).success?.should be_true
 
       # Check the state in redis
-      inst_store = PlaceOS::Driver::RedisStorage.new(inst.id.not_nil!)
+      inst_store = PlaceOS::Driver::RedisStorage.new(inst.id)
       status = JSON.parse(inst_store["state"])
       status["triggered"].as_bool.should be_true
       status["trigger_count"].as_i.should eq(1)
@@ -156,7 +156,7 @@ module PlaceOS::Triggers
       instance_loader.process_resource(:created, inst2).success?.should be_true
 
       # create the status lookup structure
-      sys_id = system.id.not_nil!
+      sys_id = system.id
       storage = PlaceOS::Driver::RedisStorage.new(sys_id, "system")
       storage["Test/1"] = module_id
 
@@ -168,10 +168,10 @@ module PlaceOS::Triggers
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
 
       # Ensure the trigger hasn't fired
-      state = mappings.state_for?(inst).not_nil!
+      state = mappings.state_for?(inst)
       state.triggered.should be_false
 
-      state2 = mappings.state_for?(inst2).not_nil!
+      state2 = mappings.state_for?(inst2)
       state2.triggered.should be_false
 
       store[:state] = {on: true}.to_json
@@ -200,10 +200,10 @@ module PlaceOS::Triggers
       sleep 0.1
 
       # The state is replaced with a new state on update
-      state = mappings.state_for?(inst).not_nil!
+      state = mappings.state_for?(inst)
       state.triggered.should be_false
 
-      state2 = mappings.state_for?(inst2).not_nil!
+      state2 = mappings.state_for?(inst2)
       state2.triggered.should be_false
       store[:greeting] = "hello".to_json
 
@@ -236,7 +236,7 @@ module PlaceOS::Triggers
       sleep 0.1
 
       # Check the state in redis
-      inst_store = PlaceOS::Driver::RedisStorage.new(inst.id.not_nil!)
+      inst_store = PlaceOS::Driver::RedisStorage.new(inst.id)
       status = JSON.parse(inst_store["state"])
 
       status["triggered"].as_bool.should be_true
@@ -244,7 +244,7 @@ module PlaceOS::Triggers
       status["action_errors"].as_i.should eq(0)
       status["comparison_errors"].as_i.should eq(0)
 
-      inst_store = PlaceOS::Driver::RedisStorage.new(inst2.id.not_nil!)
+      inst_store = PlaceOS::Driver::RedisStorage.new(inst2.id)
 
       status = JSON.parse(inst_store["state"])
       status["triggered"].as_bool.should be_true

@@ -30,7 +30,7 @@ module PlaceOS::Triggers
       trigger = trigger_cache[trigger_id]?
 
       if trigger.nil?
-        trigger = trigger_cache[trigger_id] = instance.trigger.not_nil!
+        trigger = trigger_cache[trigger_id] = instance.trigger
       end
 
       add_instance(trigger, instance)

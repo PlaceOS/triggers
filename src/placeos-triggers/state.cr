@@ -25,8 +25,8 @@ module PlaceOS::Triggers
 
     getter trigger : Model::Trigger
     getter instance : Model::TriggerInstance
-    getter trigger_id : String { trigger.id.not_nil! }
-    getter instance_id : String { instance.id.not_nil! }
+    getter trigger_id : String { trigger.id }
+    getter instance_id : String { instance.id }
 
     private getter debounce_period : Time::Span do
       trigger.debounce_period ? trigger.debounce_period.milliseconds : 59.seconds
@@ -76,13 +76,13 @@ module PlaceOS::Triggers
         conditions_met[condition_key] = false
 
         case time.type
-        in .at?   then time_at(condition_key, time.time.not_nil!)
-        in .cron? then time_cron(condition_key, time.cron.not_nil!, time.timezone)
+        in .at?   then time_at(condition_key, time.time)
+        in .cron? then time_cron(condition_key, time.cron, time.timezone)
         end
       end
 
       # Monitor status values to track conditions
-      system_id = instance.control_system_id.not_nil!
+      system_id = instance.control_system_id
       trigger.conditions.comparisons.each_with_index do |comparison, index|
         condition_key = "comparison_#{index}"
         conditions_met[condition_key] = false
@@ -174,7 +174,7 @@ module PlaceOS::Triggers
       # Check if we should run the actions
       return unless triggered
 
-      system_id = instance.control_system_id.not_nil!
+      system_id = instance.control_system_id
 
       # Perform actions
       trigger.actions.functions.each_with_index do |action, function_index|
