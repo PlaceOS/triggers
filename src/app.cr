@@ -104,6 +104,7 @@ module PlaceOS::Triggers
     end
   end
 
+  # TODO:: Pulse requires fixing!
   # Start telemetry
   # PlaceOS::Triggers.start_pulse
 

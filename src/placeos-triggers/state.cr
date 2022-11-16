@@ -26,7 +26,7 @@ module PlaceOS::Triggers
     getter trigger : Model::Trigger
     getter instance : Model::TriggerInstance
     getter trigger_id : String { trigger.id }
-    getter instance_id : String { instance.id }
+    getter instance_id : String { instance.id.not_nil! }
 
     private getter debounce_period : Time::Span do
       trigger.debounce_period ? trigger.debounce_period.milliseconds : 59.seconds
@@ -82,7 +82,7 @@ module PlaceOS::Triggers
       end
 
       # Monitor status values to track conditions
-      system_id = instance.control_system_id
+      system_id = instance.control_system_id.not_nil!
       trigger.conditions.comparisons.each_with_index do |comparison, index|
         condition_key = "comparison_#{index}"
         conditions_met[condition_key] = false
@@ -174,7 +174,7 @@ module PlaceOS::Triggers
       # Check if we should run the actions
       return unless triggered
 
-      system_id = instance.control_system_id
+      system_id = instance.control_system_id.not_nil!
 
       # Perform actions
       trigger.actions.functions.each_with_index do |action, function_index|
@@ -184,7 +184,7 @@ module PlaceOS::Triggers
         Log.debug { {
           system_id:  system_id,
           module:     modname,
-          index:      index,
+          index:      index.to_s,
           method:     action.method,
           request_id: request_id,
           trigger:    instance.trigger_id,
@@ -257,12 +257,12 @@ module PlaceOS::Triggers
     end
 
     def time_at(key, time)
-      condition_timers << Tasker.at(time) { temporary_condition_met(key) }
+      condition_timers << Tasker.at(time.not_nil!) { temporary_condition_met(key) }
     end
 
     def time_cron(key, cron, timezone)
       location = timezone ? Time::Location.load(timezone) : Time::Location.local
-      condition_timers << Tasker.cron(cron, location) { temporary_condition_met(key) }
+      condition_timers << Tasker.cron(cron.not_nil!, location) { temporary_condition_met(key) }
     end
 
     def temporary_condition_met(key : String)

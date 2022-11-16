@@ -72,7 +72,7 @@ abstract class Application < ActionController::Base
   @[AC::Route::Exception(AC::Route::NotAcceptable, status_code: HTTP::Status::NOT_ACCEPTABLE)]
   @[AC::Route::Exception(AC::Route::UnsupportedMediaType, status_code: HTTP::Status::UNSUPPORTED_MEDIA_TYPE)]
   def bad_media_type(error) : ContentError
-    ContentError.new error: error.message, accepts: error.accepts
+    ContentError.new error: error.message.not_nil!, accepts: error.accepts
   end
 
   # Provides details on which parameter is missing or invalid
@@ -92,6 +92,6 @@ abstract class Application < ActionController::Base
   @[AC::Route::Exception(AC::Route::Param::MissingError, status_code: HTTP::Status::UNPROCESSABLE_ENTITY)]
   @[AC::Route::Exception(AC::Route::Param::ValueError, status_code: HTTP::Status::BAD_REQUEST)]
   def invalid_param(error) : ParameterError
-    ParameterError.new error: error.message, parameter: error.parameter, restriction: error.restriction
+    ParameterError.new error: error.message.not_nil!, parameter: error.parameter, restriction: error.restriction
   end
 end
