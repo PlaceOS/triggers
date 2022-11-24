@@ -15,7 +15,7 @@ shards:
 
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
-    version: 1.3.0
+    version: 1.3.1
 
   any_hash:
     git: https://github.com/sija/any_hash.cr.git
@@ -43,7 +43,7 @@ shards:
 
   crunits:
     git: https://github.com/spider-gazelle/crunits.git
-    version: 1.1.0
+    version: 1.1.1
 
   csuuid:
     git: https://github.com/wyhaines/csuuid.cr.git
@@ -79,7 +79,7 @@ shards:
 
   eventbus:
     git: https://github.com/spider-gazelle/eventbus.git
-    version: 0.9.9+git.commit.29aa7187133c4c3ad3a769b26129faeff77a0693
+    version: 0.9.9+git.commit.086b2ba92475b88e8481b0387eb56c735cbfd7bd
 
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
@@ -187,7 +187,7 @@ shards:
 
   pg-orm:
     git: https://github.com/spider-gazelle/pg-orm.git
-    version: 1.0.0+git.commit.c533121265737f8ebdcab7d492c87b5198c2e851
+    version: 1.0.0+git.commit.1ba70d1ae9d6e40a9ab1973590ccb1a1b0c3a661
 
   placeos-core-client:
     git: https://github.com/placeos/core-client.git
@@ -205,9 +205,9 @@ shards:
     git: https://github.com/placeos/models.git
     version: 8.12.2+git.commit.d3bbbbdb005f4da11e57c7f04f08341f5a804efe
 
-  placeos-pulse:
+  placeos-pulse: # Overridden
     git: https://github.com/placeos/pulse.git
-    version: 1.0.0
+    version: 1.0.0+git.commit.1234d14ef47a446342a771e05f4818e9e87f57fd
 
   pool:
     git: https://github.com/ysbaddaden/pool.git
@@ -284,3 +284,4 @@ shards:
   webmock:
     git: https://github.com/manastech/webmock.cr.git
     version: 0.14.0+git.commit.42b347cdd64e13193e46167a03593944ae2b3d20
+

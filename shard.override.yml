@@ -20,3 +20,7 @@ dependencies:
   placeos-models:
     github: placeos/models
     branch: refactor/pg-migration
+
+  placeos-pulse:
+    github: placeos/pulse
+    branch: refactor/pg-migration

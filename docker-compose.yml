@@ -14,6 +14,8 @@ x-postgresdb-client-env: &postgresdb-client-env
   PG_HOST: ${PG_HOST:-postgres}
   PG_PORT: ${PG_PORT:-5432}
   PG_DB: ${PG_DB:-place_development}
+  PG_USER: ${PG_USER:-postgres}
+  PG_PASSWORD: ${PG_PASSWORD:-password}
 
 services:
   test:
@@ -29,7 +31,7 @@ services:
       - ${PWD}/coverage:/app/coverage
     depends_on:
       - redis
-      - rethink
+      - postgres
     security_opt:
       - seccomp:unconfined
     environment:
