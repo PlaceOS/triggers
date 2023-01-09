@@ -198,7 +198,9 @@ module PlaceOS::Triggers
             modname,
             index,
             PlaceOS::Triggers.discovery
-          ).exec(
+          ) { |module_id|
+            Model::Module.find!(module_id).edge_id.as(String)
+          }.exec(
             PlaceOS::Driver::Proxy::RemoteDriver::Clearance::Admin,
             action.method,
             named_args: action.args,
