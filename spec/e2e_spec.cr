@@ -21,9 +21,13 @@ module PlaceOS::Triggers
   describe "e2e" do
     it "creates a trigger, updates it and checks that exec works" do
       # Trigger state for the system
-      mappings = Mapping.new
-      trigger_loader = Loader::Trigger.new(mappings)
-      instance_loader = Loader::TriggerInstance.new(mappings)
+      mappings = PlaceOS::Triggers.mapping
+      trig_cf = Model::Trigger.changes
+      trigi_cf = Model::TriggerInstance.changes
+      listen_for_changes(trig_cf, mappings)
+      listen_for_changes(trigi_cf, mappings)
+
+      sleep 0.1
 
       trigger = Model::Generator.trigger
       compare = Model::Trigger::Conditions::Comparison.new(
@@ -39,11 +43,7 @@ module PlaceOS::Triggers
       trigger.valid?.should be_true
       trigger.save!
 
-      trigger_loader.process_resource(:created, trigger).success?.should be_true
-
       inst = Model::Generator.trigger_instance(trigger).save!
-
-      instance_loader.process_resource(:created, inst)
 
       # create the status lookup structure
       sys_id = inst.control_system_id.not_nil!
@@ -80,8 +80,7 @@ module PlaceOS::Triggers
 
       trigger.conditions.try &.comparisons = [compare, compare2]
       trigger.conditions_will_change!
-
-      trigger_loader.process_resource(:updated, trigger)
+      trigger.update
 
       sleep 0.1
 
@@ -112,8 +111,7 @@ module PlaceOS::Triggers
 
       trigger.actions.try &.functions = [func]
       trigger.actions_will_change!
-
-      trigger_loader.process_resource(:created, trigger).success?.should be_true
+      trigger.update
 
       # Check the state in redis
       inst_store = PlaceOS::Driver::RedisStorage.new(inst.id.not_nil!)
@@ -122,13 +120,20 @@ module PlaceOS::Triggers
       status["trigger_count"].as_i.should eq(1)
       status["action_errors"].as_i.should eq(0)
       status["comparison_errors"].as_i.should eq(0)
+
+      trig_cf.stop
+      trigi_cf.stop
     end
 
     it "creates two triggers, updates them and checks they work" do
       # Trigger state for the system
-      mappings = Mapping.new
-      trigger_loader = Loader::Trigger.new(mappings)
-      instance_loader = Loader::TriggerInstance.new(mappings)
+      mappings = PlaceOS::Triggers.mapping
+      trig_cf = Model::Trigger.changes
+      trigi_cf = Model::TriggerInstance.changes
+      listen_for_changes(trig_cf, mappings)
+      listen_for_changes(trigi_cf, mappings)
+
+      sleep 0.1
 
       system = Model::Generator.control_system.save!
 
@@ -147,13 +152,8 @@ module PlaceOS::Triggers
       trigger.valid?.should be_true
       trigger.save!
 
-      trigger_loader.process_resource(:created, trigger).success?.should be_true
-
       inst = Model::Generator.trigger_instance(trigger, control_system: system).save!
       inst2 = Model::Generator.trigger_instance(trigger, control_system: system).save!
-
-      instance_loader.process_resource(:created, inst).success?.should be_true
-      instance_loader.process_resource(:created, inst2).success?.should be_true
 
       # create the status lookup structure
       sys_id = system.id.not_nil!
@@ -194,8 +194,7 @@ module PlaceOS::Triggers
 
       trigger.conditions.try &.comparisons = [compare, compare2]
       trigger.conditions_will_change!
-
-      trigger_loader.process_resource(:updated, trigger).success?.should be_true
+      trigger.update
 
       sleep 0.1
 
@@ -231,8 +230,6 @@ module PlaceOS::Triggers
       trigger.actions.try &.functions = [func]
       trigger.actions_will_change!
 
-      trigger_loader.process_resource(:updated, trigger).success?.should be_true
-
       sleep 0.1
 
       # Check the state in redis
@@ -251,6 +248,9 @@ module PlaceOS::Triggers
       status["trigger_count"].as_i.should eq(1)
       status["action_errors"].as_i.should eq(0)
       status["comparison_errors"].as_i.should eq(0)
+
+      trig_cf.stop
+      trigi_cf.stop
     end
   end
 end

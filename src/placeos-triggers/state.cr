@@ -25,7 +25,7 @@ module PlaceOS::Triggers
 
     getter trigger : Model::Trigger
     getter instance : Model::TriggerInstance
-    getter trigger_id : String { trigger.id.not_nil! }
+    getter trigger_id : String { trigger.id }
     getter instance_id : String { instance.id.not_nil! }
 
     private getter debounce_period : Time::Span do
@@ -76,8 +76,8 @@ module PlaceOS::Triggers
         conditions_met[condition_key] = false
 
         case time.type
-        in .at?   then time_at(condition_key, time.time.not_nil!)
-        in .cron? then time_cron(condition_key, time.cron.not_nil!, time.timezone)
+        in .at?   then time_at(condition_key, time.time)
+        in .cron? then time_cron(condition_key, time.cron, time.timezone)
         end
       end
 
@@ -184,7 +184,7 @@ module PlaceOS::Triggers
         Log.debug { {
           system_id:  system_id,
           module:     modname,
-          index:      index,
+          index:      index.to_s,
           method:     action.method,
           request_id: request_id,
           trigger:    instance.trigger_id,
@@ -259,12 +259,12 @@ module PlaceOS::Triggers
     end
 
     def time_at(key, time)
-      condition_timers << Tasker.at(time) { temporary_condition_met(key) }
+      condition_timers << Tasker.at(time.not_nil!) { temporary_condition_met(key) }
     end
 
     def time_cron(key, cron, timezone)
       location = timezone ? Time::Location.load(timezone) : Time::Location.local
-      condition_timers << Tasker.cron(cron, location) { temporary_condition_met(key) }
+      condition_timers << Tasker.cron(cron.not_nil!, location) { temporary_condition_met(key) }
     end
 
     def temporary_condition_met(key : String)
