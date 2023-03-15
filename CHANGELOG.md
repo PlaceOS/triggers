@@ -1,3 +1,9 @@
+## v1.9.1 (2023-01-09)
+
+### Fix
+
+- **state**: execute on edge modules ([#42](https://github.com/PlaceOS/triggers/pull/42))
+
 ## v1.9.0 (2022-09-13)
 
 ### Feat
