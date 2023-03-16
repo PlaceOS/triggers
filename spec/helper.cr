@@ -83,7 +83,8 @@ Spec.before_suite do
       installed_ui_devices INTEGER NOT NULL,
       zones TEXT[] NOT NULL,
       modules TEXT[] NOT NULL,
-      id TEXT NOT NULL PRIMARY KEY
+      id TEXT NOT NULL PRIMARY KEY,
+      public BOOLEAN NOT NULL DEFAULT false
     );
     SQL
     db.exec <<-SQL
