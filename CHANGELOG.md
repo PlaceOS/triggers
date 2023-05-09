@@ -1,4 +1,8 @@
-## Unreleased
+## v1.10.0 (2023-05-09)
+
+### Feat
+
+- **shard.lock**: bump deps
 
 ## v1.9.1 (2023-01-09)
 
