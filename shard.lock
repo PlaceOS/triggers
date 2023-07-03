@@ -83,7 +83,7 @@ shards:
 
   exception_page:
     git: https://github.com/crystal-loot/exception_page.git
-    version: 0.3.0
+    version: 0.3.1
 
   faker:
     git: https://github.com/askn/faker.git
@@ -195,7 +195,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 6.8.6
+    version: 6.9.1
 
   placeos-log-backend: # Overridden
     git: https://github.com/place-labs/log-backend.git
