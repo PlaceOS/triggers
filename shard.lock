@@ -187,7 +187,7 @@ shards:
 
   pg-orm:
     git: https://github.com/spider-gazelle/pg-orm.git
-    version: 1.0.0+git.commit.d9b9e900ea531fb2920962d72762de6120325892
+    version: 1.0.0+git.commit.e614b076c9f185d0891b505ea74c4b5e7e6307b7
 
   placeos-core-client:
     git: https://github.com/placeos/core-client.git
@@ -195,7 +195,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 6.9.1
+    version: 6.9.2
 
   placeos-log-backend: # Overridden
     git: https://github.com/place-labs/log-backend.git
