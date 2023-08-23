@@ -9,7 +9,6 @@ dependencies:
   # Web server
   action-controller:
     github: spider-gazelle/action-controller
-    version: ~> 5.3
 
   email:
     github: arcage/crystal-email
@@ -30,7 +29,6 @@ dependencies:
   # Models
   placeos-models:
     github: placeos/models
-    version: ~> 9.0
 
   # Log Backend
   placeos-log-backend:
