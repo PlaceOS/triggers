@@ -123,19 +123,6 @@ Spec.after_suite do
   end
 end
 
-def listen_for_changes(changefeed, mapping)
-  spawn do
-    changefeed.each do |change|
-      model = change.value
-      case change.event
-      in .created? then mapping.add(model)
-      in .deleted? then mapping.remove(model)
-      in .updated? then mapping.update(model)
-      end
-    end
-  end
-end
-
 module PlaceOS::Api::SpecClient
   # Can't use ivars at top level, hence this hack
   private CLIENT = ActionController::SpecHelper.client

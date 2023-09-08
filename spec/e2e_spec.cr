@@ -22,14 +22,16 @@ module PlaceOS::Triggers
     it "creates a trigger, updates it and checks that exec works" do
       # Trigger state for the system
       mappings = PlaceOS::Triggers.mapping
-      trig_cf = Model::Trigger.changes
-      trigi_cf = Model::TriggerInstance.changes
-      listen_for_changes(trig_cf, mappings)
-      listen_for_changes(trigi_cf, mappings)
+
+      trig_cf = Triggers.trigger_resource
+      trigi_cf = Triggers.trigger_instance_resource
+      trig_cf.start
+      trigi_cf.start
 
       sleep 0.1
 
       trigger = Model::Generator.trigger
+
       compare = Model::Trigger::Conditions::Comparison.new(
         left: true,
         operator: :and,
@@ -128,10 +130,10 @@ module PlaceOS::Triggers
     it "creates two triggers, updates them and checks they work" do
       # Trigger state for the system
       mappings = PlaceOS::Triggers.mapping
-      trig_cf = Model::Trigger.changes
-      trigi_cf = Model::TriggerInstance.changes
-      listen_for_changes(trig_cf, mappings)
-      listen_for_changes(trigi_cf, mappings)
+      trig_cf = Triggers.trigger_resource
+      trigi_cf = Triggers.trigger_instance_resource
+      trig_cf.start
+      trigi_cf.start
 
       sleep 0.1
 
