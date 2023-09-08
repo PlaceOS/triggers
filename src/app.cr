@@ -78,6 +78,14 @@ module PlaceOS::Triggers
   Signal::INT.trap &terminate
   Signal::TERM.trap &terminate
 
+  # Configure the database connection. First check if PG_DATABASE_URL environment variable
+  # is set. If not, assume database configuration are set via individual environment variables
+  if pg_url = ENV["PG_DATABASE_URL"]?
+    PgORM::Database.parse(pg_url)
+  else
+    PgORM::Database.configure { |_| }
+  end
+
   # start monitoring for changes
   self.trigger_resource.start
   self.trigger_instance_resource.start
