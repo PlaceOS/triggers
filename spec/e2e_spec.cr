@@ -59,14 +59,14 @@ module PlaceOS::Triggers
 
       # Ensure the trigger hasn't fired
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
 
       store[:state] = {on: true}.to_json
 
       sleep 0.1
 
       # ensure the trigger has fired
-      state.triggered.should be_true
+      state.triggered?.should be_true
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
@@ -86,12 +86,12 @@ module PlaceOS::Triggers
 
       # The state is replaced with a new state on update
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
       store[:greeting] = "hello".to_json
 
       sleep 0.1
 
-      state.triggered.should be_true
+      state.triggered?.should be_true
 
       func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",
@@ -169,18 +169,18 @@ module PlaceOS::Triggers
 
       # Ensure the trigger hasn't fired
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
 
       state2 = mappings.state_for?(inst2).not_nil!
-      state2.triggered.should be_false
+      state2.triggered?.should be_false
 
       store[:state] = {on: true}.to_json
 
       sleep 0.1
 
       # ensure the trigger has fired
-      state.triggered.should be_true
-      state2.triggered.should be_true
+      state.triggered?.should be_true
+      state2.triggered?.should be_true
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
@@ -200,16 +200,16 @@ module PlaceOS::Triggers
 
       # The state is replaced with a new state on update
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
 
       state2 = mappings.state_for?(inst2).not_nil!
-      state2.triggered.should be_false
+      state2.triggered?.should be_false
       store[:greeting] = "hello".to_json
 
       sleep 0.1
 
-      state.triggered.should be_true
-      state2.triggered.should be_true
+      state.triggered?.should be_true
+      state2.triggered?.should be_true
 
       func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",

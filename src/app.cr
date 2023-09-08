@@ -78,31 +78,9 @@ module PlaceOS::Triggers
   Signal::INT.trap &terminate
   Signal::TERM.trap &terminate
 
-  mapping = self.mapping
-
-  # Start watching trigger table
-  spawn do
-    Model::Trigger.changes.each do |change|
-      model = change.value
-      case change.event
-      in .created? then mapping.add(model)
-      in .deleted? then mapping.remove(model)
-      in .updated? then mapping.update(model)
-      end
-    end
-  end
-
-  # Start watching trigger instance table
-  spawn do
-    Model::TriggerInstance.changes.each do |change|
-      model = change.value
-      case change.event
-      in .created? then mapping.add(model)
-      in .deleted? then mapping.remove(model)
-      in .updated? then mapping.update(model)
-      end
-    end
-  end
+  # start monitoring for changes
+  self.trigger_resource.start
+  self.trigger_instance_resource.start
 
   # Start telemetry
   PlaceOS::Triggers.start_pulse

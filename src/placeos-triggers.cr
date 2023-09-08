@@ -7,6 +7,8 @@ require "./placeos-triggers/*"
 
 module PlaceOS::Triggers
   class_getter mapping = Mapping.new
+  class_getter trigger_resource = TriggerResource.new
+  class_getter trigger_instance_resource = TriggerInstanceResource.new
 
   class_getter pulse : Pulse::Client? do
     unless pulse_enabled?

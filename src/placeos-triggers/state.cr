@@ -21,7 +21,7 @@ module PlaceOS::Triggers
     @action_errors : Int64 = 0_i64
 
     getter count : Int64 = 0_i64
-    getter triggered : Bool = false
+    getter? triggered : Bool = false
 
     getter trigger : Model::Trigger
     getter instance : Model::TriggerInstance
@@ -136,7 +136,7 @@ module PlaceOS::Triggers
 
     def publish_state
       state = {
-        triggered:         triggered,
+        triggered:         triggered?,
         trigger_count:     count,
         action_errors:     @action_errors,
         comparison_errors: @comparison_errors,
