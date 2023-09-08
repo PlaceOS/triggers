@@ -35,6 +35,10 @@ dependencies:
     github: place-labs/log-backend
     version: ">= 0.11.0"
 
+  # change feeds
+  placeos-resource:
+    github: place-labs/resource
+
   # PlaceOS Telemetry
   placeos-pulse:
     github: placeos/pulse

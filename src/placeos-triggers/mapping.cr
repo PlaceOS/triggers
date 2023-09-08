@@ -12,13 +12,12 @@ module PlaceOS::Triggers
     end
 
     {% for verb in %w(add update remove) %}
-      def {{ verb.id }}(model : Model::TriggerInstance | Model::Trigger)
-        mapping_lock.synchronize do
-          case model
-          in Model::TriggerInstance then {{ verb.id }}_instance(model)
-          in Model::Trigger         then {{ verb.id }}_trigger(model)
-          end
-        end
+      def {{ verb.id }}(model : Model::Trigger)
+        mapping_lock.synchronize { {{ verb.id }}_trigger(model) }
+      end
+
+      def {{ verb.id }}(model : Model::TriggerInstance)
+        mapping_lock.synchronize { {{ verb.id }}_instance(model) }
       end
     {% end %}
 

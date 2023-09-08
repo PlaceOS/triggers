@@ -22,14 +22,16 @@ module PlaceOS::Triggers
     it "creates a trigger, updates it and checks that exec works" do
       # Trigger state for the system
       mappings = PlaceOS::Triggers.mapping
-      trig_cf = Model::Trigger.changes
-      trigi_cf = Model::TriggerInstance.changes
-      listen_for_changes(trig_cf, mappings)
-      listen_for_changes(trigi_cf, mappings)
+
+      trig_cf = Triggers.trigger_resource
+      trigi_cf = Triggers.trigger_instance_resource
+      trig_cf.start
+      trigi_cf.start
 
       sleep 0.1
 
       trigger = Model::Generator.trigger
+
       compare = Model::Trigger::Conditions::Comparison.new(
         left: true,
         operator: :and,
@@ -59,14 +61,14 @@ module PlaceOS::Triggers
 
       # Ensure the trigger hasn't fired
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
 
       store[:state] = {on: true}.to_json
 
       sleep 0.1
 
       # ensure the trigger has fired
-      state.triggered.should be_true
+      state.triggered?.should be_true
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
@@ -86,12 +88,12 @@ module PlaceOS::Triggers
 
       # The state is replaced with a new state on update
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
       store[:greeting] = "hello".to_json
 
       sleep 0.1
 
-      state.triggered.should be_true
+      state.triggered?.should be_true
 
       func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",
@@ -128,10 +130,10 @@ module PlaceOS::Triggers
     it "creates two triggers, updates them and checks they work" do
       # Trigger state for the system
       mappings = PlaceOS::Triggers.mapping
-      trig_cf = Model::Trigger.changes
-      trigi_cf = Model::TriggerInstance.changes
-      listen_for_changes(trig_cf, mappings)
-      listen_for_changes(trigi_cf, mappings)
+      trig_cf = Triggers.trigger_resource
+      trigi_cf = Triggers.trigger_instance_resource
+      trig_cf.start
+      trigi_cf.start
 
       sleep 0.1
 
@@ -169,18 +171,18 @@ module PlaceOS::Triggers
 
       # Ensure the trigger hasn't fired
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
 
       state2 = mappings.state_for?(inst2).not_nil!
-      state2.triggered.should be_false
+      state2.triggered?.should be_false
 
       store[:state] = {on: true}.to_json
 
       sleep 0.1
 
       # ensure the trigger has fired
-      state.triggered.should be_true
-      state2.triggered.should be_true
+      state.triggered?.should be_true
+      state2.triggered?.should be_true
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
@@ -200,16 +202,16 @@ module PlaceOS::Triggers
 
       # The state is replaced with a new state on update
       state = mappings.state_for?(inst).not_nil!
-      state.triggered.should be_false
+      state.triggered?.should be_false
 
       state2 = mappings.state_for?(inst2).not_nil!
-      state2.triggered.should be_false
+      state2.triggered?.should be_false
       store[:greeting] = "hello".to_json
 
       sleep 0.1
 
-      state.triggered.should be_true
-      state2.triggered.should be_true
+      state.triggered?.should be_true
+      state2.triggered?.should be_true
 
       func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",

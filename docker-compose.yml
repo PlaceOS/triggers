@@ -36,11 +36,9 @@ services:
       - seccomp:unconfined
     environment:
       # Service Hosts
-      << : *redis-client-env
-      << : *postgresdb-client-env
+      <<: [*redis-client-env,*postgresdb-client-env,*deployment-env]
       # Environment
       GITHUB_ACTION: ${GITHUB_ACTION:-}
-      << : *deployment-env
 
   redis:
     image: eqalpha/keydb
@@ -61,8 +59,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: place_development
-    healthcheck:
-      test: /usr/bin/pg_isready
-      interval: 5s
+    #healthcheck:
+    #  test: /usr/bin/pg_isready
+    #  interval: 5s
     ports:
       - 5432:5432
