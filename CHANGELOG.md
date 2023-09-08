@@ -1,3 +1,9 @@
+## v1.12.0 (2023-09-08)
+
+### Feat
+
+- refactor triggers to use place resource ([#43](https://github.com/PlaceOS/triggers/pull/43))
+
 ## v1.11.2 (2023-07-04)
 
 ### Fix
