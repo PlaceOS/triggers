@@ -93,6 +93,10 @@ module PlaceOS::Triggers
   # Start telemetry
   PlaceOS::Triggers.start_pulse
 
+  # Start Driver update finder task
+  task = PlaceOS::Triggers::DriverUpdate.new(DRIVER_UPDATE_CHECK_INTERVAL)
+  task.start
+
   # Start the server
   server.run do
     Log.info { "listening on #{server.print_addresses}" }

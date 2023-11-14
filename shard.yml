@@ -29,6 +29,7 @@ dependencies:
   # Models
   placeos-models:
     github: placeos/models
+    version: ~> 9.20
 
   # Log Backend
   placeos-log-backend:
@@ -52,6 +53,9 @@ dependencies:
   # Timers / Scheduling
   tasker:
     github: spider-gazelle/tasker
+
+  git-repository:
+    github: place-labs/git-repository
 
 development_dependencies:
   ameba:
