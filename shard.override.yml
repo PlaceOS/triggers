@@ -16,3 +16,6 @@ dependencies:
   placeos-pulse:
     github: placeos/pulse
     branch: master
+
+  ulid:
+    github: place-labs/ulid
