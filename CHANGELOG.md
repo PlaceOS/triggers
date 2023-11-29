@@ -1,3 +1,9 @@
+## v1.13.0 (2023-11-29)
+
+### Feat
+
+- PPT-1038 Job to identify version upgrade for drivers ([#44](https://github.com/PlaceOS/triggers/pull/44))
+
 ## v1.12.0 (2023-09-08)
 
 ### Feat
