@@ -223,7 +223,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 9.37.4
+    version: 9.39.1
 
   placeos-pulse: # Overridden
     git: https://github.com/placeos/pulse.git
