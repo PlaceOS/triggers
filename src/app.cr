@@ -97,6 +97,10 @@ module PlaceOS::Triggers
   task = PlaceOS::Triggers::DriverUpdate.new(DRIVER_UPDATE_CHECK_INTERVAL)
   task.start
 
+  # Start Secret expiry finder task
+  secret_task = PlaceOS::Triggers::GraphSecretExpiryFinder.new(GRAPH_SECRET_CHECK_INTERVAL)
+  secret_task.start
+
   # Start the server
   server.run do
     Log.info { "listening on #{server.print_addresses}" }
