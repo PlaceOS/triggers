@@ -28,6 +28,7 @@ module PlaceOS::Triggers
   PLACE_PULSE_INSTANCE_EMAIL = ENV["PLACE_PULSE_INSTANCE_EMAIL"]?.presence
 
   DRIVER_UPDATE_CHECK_INTERVAL = ENV["UPDATE_CHECK_INTERVAL"]? || "2h"
+  GRAPH_SECRET_CHECK_INTERVAL  = ENV["GRAPH_SECRET_CHECK_INTERVAL"]? || "24h"
   # HoundDog Configuration.
   # ----------------------------------
   # ETCD_HOST (default: "127.0.0.1")
