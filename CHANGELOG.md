@@ -1,3 +1,9 @@
+## v1.14.0 (2024-04-10)
+
+### Feat
+
+- PPT-1224 Add trigger to periodically check for secret expiry ([#45](https://github.com/PlaceOS/triggers/pull/45))
+
 ## v1.13.0 (2023-11-29)
 
 ### Feat
