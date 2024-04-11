@@ -1,7 +1,8 @@
 require "secrets-env"
-require "hound-dog"
 
 module PlaceOS::Triggers
+  alias RemoteDriver = ::PlaceOS::Driver::Proxy::RemoteDriver
+
   APP_NAME = "triggers"
   {% begin %}
     VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify.downcase }}
@@ -29,15 +30,7 @@ module PlaceOS::Triggers
 
   DRIVER_UPDATE_CHECK_INTERVAL = ENV["UPDATE_CHECK_INTERVAL"]? || "2h"
   GRAPH_SECRET_CHECK_INTERVAL  = ENV["GRAPH_SECRET_CHECK_INTERVAL"]? || "24h"
-  # HoundDog Configuration.
-  # ----------------------------------
-  # ETCD_HOST (default: "127.0.0.1")
-  # ETCD_PORT (default: 2379)
-  # ETCD_TTL  (default: 15)
 
-  CORE_NAMESPACE = "core"
-
-  class_getter discovery : HoundDog::Discovery { HoundDog::Discovery.new(CORE_NAMESPACE) }
   class_getter? production : Bool = ENVIRONMENT.downcase == "production"
   class_getter? pulse_enabled : Bool = PULSE_ENABLED
   class_getter? smtp_authenticated : Bool = !SMTP_USER.empty?
