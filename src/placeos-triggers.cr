@@ -10,6 +10,15 @@ module PlaceOS::Triggers
   class_getter trigger_resource = TriggerResource.new
   class_getter trigger_instance_resource = TriggerInstanceResource.new
 
+  def self.extract_time_span(interval : String) : Time::Span
+    matches = interval.downcase.match(/((\d+)h)?\s*:?\s*((\d+)m)?\s*:?\s*((\d+)s)?/)
+    raise "Invalid interval '#{interval}' value. Interval need to be in format 'xh:xm:xs' where 'x' represents number. e.g. '2h' or '5m30s' or '3s' etc" unless matches
+    hours = matches[2]?.try &.to_i? || 0
+    minutes = matches[4]?.try &.to_i? || 0
+    seconds = matches[6]?.try &.to_i? || 0
+    Time::Span.new(hours: hours, minutes: minutes, seconds: seconds)
+  end
+
   class_getter pulse : Pulse::Client? do
     unless pulse_enabled?
       Log.info { "telemetry disabled as PLACE_PULSE_ENABLED is not enabled in environment" }
