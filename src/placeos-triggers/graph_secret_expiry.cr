@@ -9,11 +9,7 @@ module PlaceOS::Triggers
     end
 
     def self.new(interval : String)
-      matches = interval.downcase.match(/^(\dh)?(\dm)?(\ds)?$/)
-      raise "Invalid interval '#{interval}' value. Interval need to be in format 'xh:xm:xs' where 'x' represents number. e.g. '2h' or '5m30s' or '3s' etc" unless matches
-      values = matches.captures.map(&.try &.sub(/h|m|s/, "")).map(&.try &.to_i)
-      duration = Time::Span.new(hours: values[0] || 0, minutes: values[1] || 0, seconds: values[2] || 0)
-      new(duration)
+      new(Triggers.extract_time_span(interval))
     end
 
     def start

@@ -76,7 +76,7 @@ module PlaceOS::Triggers
       end
 
       def bind!(comparison, subscriptions, system_id) : Nil
-        module_name, index = Driver::Proxy::RemoteDriver.get_parts(status.mod)
+        module_name, index = RemoteDriver.get_parts(status.mod)
 
         Log.context.set(system_id: system_id, module: module_name, index: index)
 

@@ -1,4 +1,4 @@
-require "hound-dog"
+require "redis_service_manager"
 require "json"
 require "tasker"
 
@@ -178,7 +178,7 @@ module PlaceOS::Triggers
 
       # Perform actions
       trigger.actions.functions.each_with_index do |action, function_index|
-        modname, index = PlaceOS::Driver::Proxy::RemoteDriver.get_parts(action.mod)
+        modname, index = RemoteDriver.get_parts(action.mod)
         request_id = "action_#{function_index}_#{Time.utc.to_unix_ms}"
 
         Log.debug { {
@@ -193,15 +193,14 @@ module PlaceOS::Triggers
         } }
 
         begin
-          PlaceOS::Driver::Proxy::RemoteDriver.new(
+          RemoteDriver.new(
             system_id,
             modname,
-            index,
-            PlaceOS::Triggers.discovery
+            index
           ) { |module_id|
             Model::Module.find!(module_id).edge_id.as(String)
           }.exec(
-            PlaceOS::Driver::Proxy::RemoteDriver::Clearance::Admin,
+            RemoteDriver::Clearance::Admin,
             action.method,
             named_args: action.args,
             request_id: request_id
