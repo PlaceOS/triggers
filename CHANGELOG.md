@@ -1,3 +1,9 @@
+## v1.15.0 (2024-04-12)
+
+### Feat
+
+- migrate to redis service manager ([#46](https://github.com/PlaceOS/triggers/pull/46))
+
 ## v1.14.0 (2024-04-10)
 
 ### Feat
