@@ -30,6 +30,7 @@ module PlaceOS::Triggers
 
   DRIVER_UPDATE_CHECK_INTERVAL = ENV["UPDATE_CHECK_INTERVAL"]? || "2h"
   GRAPH_SECRET_CHECK_INTERVAL  = ENV["GRAPH_SECRET_CHECK_INTERVAL"]? || "24h"
+  LOKI_SEARCH_CHECK_INTERVAL   = ENV["LOKI_SEARCH_CHECK_INTERVAL"]? || "1h"
 
   class_getter? production : Bool = ENVIRONMENT.downcase == "production"
   class_getter? pulse_enabled : Bool = PULSE_ENABLED

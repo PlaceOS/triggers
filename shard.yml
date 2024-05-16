@@ -59,6 +59,9 @@ dependencies:
   git-repository:
     github: place-labs/git-repository
 
+  loki-client:
+    github: spider-gazelle/crystal-loki-client
+
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba
