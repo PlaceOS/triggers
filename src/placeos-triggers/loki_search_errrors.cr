@@ -27,8 +27,8 @@ module PlaceOS::Triggers
           begin
             errors = Array(Tuple(String, String)).new
             result = @client.query_range(query, 1000, Time.utc - 24.hour, Time.utc, Loki::Direction::Backward)
-            result.response_data.result.as(Loki::Model::Streams).each do |stream|
-              map = stream.labels.map
+            result.response_data.result.as(Loki::Model::Streams).each do |resp_stream|
+              map = resp_stream.labels.map
               errors << {map["source"], map["time"]}
             end
             if errors.empty?
