@@ -1,3 +1,9 @@
+## v1.16.0 (2024-05-21)
+
+### Feat
+
+- PPT-1322 Trigger for periodic check of mods runtime error ([#47](https://github.com/PlaceOS/triggers/pull/47))
+
 ## v1.15.0 (2024-04-12)
 
 ### Feat
