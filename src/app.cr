@@ -101,9 +101,11 @@ module PlaceOS::Triggers
   secret_task = PlaceOS::Triggers::GraphSecretExpiryFinder.new(GRAPH_SECRET_CHECK_INTERVAL)
   secret_task.start
 
-  # Start Loki log search task
-  search_err = PlaceOS::Triggers::LokiSearchForErrors.new(LOKI_SEARCH_CHECK_INTERVAL)
-  search_err.start
+  if ENV["LOKI_ADDR"]?.presence
+    # Start Loki log search task
+    search_err = PlaceOS::Triggers::LokiSearchForErrors.new(LOKI_SEARCH_CHECK_INTERVAL)
+    search_err.start
+  end
 
   # Start the server
   server.run do
