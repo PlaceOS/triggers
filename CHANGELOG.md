@@ -1,3 +1,9 @@
+## v1.17.0 (2024-06-20)
+
+### Feat
+
+- Make loki-search trigger Loki presence dependent ([#48](https://github.com/PlaceOS/triggers/pull/48))
+
 ## v1.16.0 (2024-05-21)
 
 ### Feat
