@@ -28,7 +28,7 @@ module PlaceOS::Triggers
       trig_cf.start
       trigi_cf.start
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       trigger = Model::Generator.trigger
 
@@ -54,7 +54,7 @@ module PlaceOS::Triggers
 
       PlaceOS::Driver::Subscriptions.new_redis.publish "lookup-change", sys_id
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
@@ -65,7 +65,7 @@ module PlaceOS::Triggers
 
       store[:state] = {on: true}.to_json
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       # ensure the trigger has fired
       state.triggered?.should be_true
@@ -84,14 +84,14 @@ module PlaceOS::Triggers
       trigger.conditions_will_change!
       trigger.update
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       # The state is replaced with a new state on update
       state = mappings.state_for?(inst).not_nil!
       state.triggered?.should be_false
       store[:greeting] = "hello".to_json
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       state.triggered?.should be_true
 
@@ -135,7 +135,7 @@ module PlaceOS::Triggers
       trig_cf.start
       trigi_cf.start
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       system = Model::Generator.control_system.save!
 
@@ -164,7 +164,7 @@ module PlaceOS::Triggers
 
       PlaceOS::Driver::Subscriptions.new_redis.publish "lookup-change", sys_id
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
@@ -178,7 +178,7 @@ module PlaceOS::Triggers
 
       store[:state] = {on: true}.to_json
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       # ensure the trigger has fired
       state.triggered?.should be_true
@@ -198,7 +198,7 @@ module PlaceOS::Triggers
       trigger.conditions_will_change!
       trigger.update
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       # The state is replaced with a new state on update
       state = mappings.state_for?(inst).not_nil!
@@ -208,7 +208,7 @@ module PlaceOS::Triggers
       state2.triggered?.should be_false
       store[:greeting] = "hello".to_json
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       state.triggered?.should be_true
       state2.triggered?.should be_true
@@ -232,7 +232,7 @@ module PlaceOS::Triggers
       trigger.actions.try &.functions = [func]
       trigger.actions_will_change!
 
-      sleep 0.1
+      sleep 100.milliseconds
 
       # Check the state in redis
       inst_store = PlaceOS::Driver::RedisStorage.new(inst.id.not_nil!)

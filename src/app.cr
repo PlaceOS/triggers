@@ -69,7 +69,7 @@ module PlaceOS::Triggers
 
   terminate = Proc(Signal, Nil).new do |signal|
     puts " > terminating gracefully"
-    spawn(same_thread: true) { server.close }
+    spawn { server.close }
     signal.ignore
   end
 
