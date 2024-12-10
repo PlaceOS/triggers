@@ -7,7 +7,7 @@ shards:
 
   action-controller:
     git: https://github.com/spider-gazelle/action-controller.git
-    version: 7.4.3
+    version: 7.5.0
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
@@ -15,7 +15,7 @@ shards:
 
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
-    version: 1.6.3
+    version: 1.6.4
 
   any_hash:
     git: https://github.com/sija/any_hash.cr.git
@@ -55,7 +55,7 @@ shards:
 
   debug:
     git: https://github.com/sija/debug.cr.git
-    version: 2.0.3
+    version: 2.0.4
 
   defined:
     git: https://github.com/wyhaines/defined.cr.git
@@ -167,7 +167,7 @@ shards:
 
   opentelemetry-instrumentation:
     git: https://github.com/wyhaines/opentelemetry-instrumentation.cr.git
-    version: 0.5.4+git.commit.9b26aabef208b9eb0bf4612788362fa41768790b
+    version: 0.5.5+git.commit.83eace832dad20a71231e71a42258538b05fb193
 
   opentelemetry-sdk: # Overridden
     git: https://github.com/wyhaines/opentelemetry-sdk.cr.git
@@ -203,7 +203,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 7.2.16
+    version: 7.3.0
 
   placeos-log-backend: # Overridden
     git: https://github.com/place-labs/log-backend.git
@@ -211,7 +211,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 9.60.0
+    version: 9.60.1
 
   placeos-pulse: # Overridden
     git: https://github.com/placeos/pulse.git
@@ -231,11 +231,11 @@ shards:
 
   protobuf:
     git: https://github.com/jeromegn/protobuf.cr.git
-    version: 2.3.0
+    version: 2.3.1
 
   raven:
     git: https://github.com/sija/raven.cr.git
-    version: 1.9.4+git.commit.59020d2838c19e769d7fb5e0ee3a242cd9fdb055
+    version: 1.9.4+git.commit.a43f45229d1ee8030f8f07b101cb159896273195
 
   redis:
     git: https://github.com/stefanwille/crystal-redis.git
@@ -275,7 +275,7 @@ shards:
 
   ssh2:
     git: https://github.com/spider-gazelle/ssh2.cr.git
-    version: 1.6.1
+    version: 1.7.0
 
   tasker:
     git: https://github.com/spider-gazelle/tasker.git
