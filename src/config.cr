@@ -16,9 +16,6 @@ require "./controllers/application"
 require "./controllers/*"
 require "./placeos-triggers"
 
-# Require telemetry after application code
-require "./telemetry"
-
 # Server required after application controllers
 require "action-controller/server"
 
@@ -29,7 +26,6 @@ keeps_headers = ["X-Request-ID"]
 # Add handlers that should run before your application
 ActionController::Server.before(
   ActionController::ErrorHandler.new(PlaceOS::Triggers.production?, keeps_headers),
-  Raven::ActionController::ErrorHandler.new,
   ActionController::LogHandler.new(filter_params, ms: true),
 )
 
