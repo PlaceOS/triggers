@@ -1,3 +1,9 @@
+## v1.17.1 (2025-04-14)
+
+### Fix
+
+- **Dockerfile**: make git certificate store is explicit
+
 ## v1.17.0 (2024-06-20)
 
 ### Feat
