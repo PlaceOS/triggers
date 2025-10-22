@@ -35,7 +35,7 @@ shards:
 
   bindata:
     git: https://github.com/spider-gazelle/bindata.git
-    version: 2.1.0
+    version: 2.1.1
 
   connect-proxy:
     git: https://github.com/spider-gazelle/connect-proxy.git
@@ -67,7 +67,7 @@ shards:
 
   ed25519:
     git: https://github.com/spider-gazelle/ed25519.git
-    version: 1.0.3
+    version: 1.1.0
 
   email:
     git: https://github.com/arcage/crystal-email.git
@@ -91,7 +91,7 @@ shards:
 
   git-repository:
     git: https://github.com/place-labs/git-repository.git
-    version: 1.6.0
+    version: 1.7.0
 
   google:
     git: https://github.com/placeos/google.git
@@ -127,7 +127,7 @@ shards:
 
   jwt:
     git: https://github.com/crystal-community/jwt.git
-    version: 1.6.1
+    version: 1.7.1
 
   log_helper:
     git: https://github.com/spider-gazelle/log_helper.git
@@ -155,7 +155,7 @@ shards:
 
   openssl_ext:
     git: https://github.com/spider-gazelle/openssl_ext.git
-    version: 2.4.4
+    version: 2.6.3
 
   pars: # Overridden
     git: https://github.com/spider-gazelle/pars.git
@@ -171,7 +171,7 @@ shards:
 
   pg-orm:
     git: https://github.com/spider-gazelle/pg-orm.git
-    version: 2.0.4
+    version: 2.0.5
 
   place_calendar:
     git: https://github.com/placeos/calendar.git
@@ -183,7 +183,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 7.11.6
+    version: 7.13.3
 
   placeos-log-backend: # Overridden
     git: https://github.com/place-labs/log-backend.git
@@ -191,7 +191,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 9.76.1
+    version: 9.76.2
 
   placeos-pulse: # Overridden
     git: https://github.com/placeos/pulse.git

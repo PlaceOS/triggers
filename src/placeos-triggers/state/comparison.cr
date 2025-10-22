@@ -16,7 +16,7 @@ module PlaceOS::Triggers
       @system_id : String,
       left : Model::Trigger::Conditions::Comparison::Value,
       @operator : Operator,
-      right : Model::Trigger::Conditions::Comparison::Value
+      right : Model::Trigger::Conditions::Comparison::Value,
     )
       @left = self.class.parse_model_comparison(left)
       @right = self.class.parse_model_comparison(right)
