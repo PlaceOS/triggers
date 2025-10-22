@@ -1,3 +1,9 @@
+## v1.18.0 (2025-10-22)
+
+### Feat
+
+- add rest-api health check to triggers
+
 ## v1.17.1 (2025-04-14)
 
 ### Fix
