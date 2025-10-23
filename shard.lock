@@ -183,7 +183,7 @@ shards:
 
   placeos-driver:
     git: https://github.com/placeos/driver.git
-    version: 7.13.3
+    version: 7.14.0
 
   placeos-log-backend: # Overridden
     git: https://github.com/place-labs/log-backend.git
