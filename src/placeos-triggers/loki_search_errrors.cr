@@ -18,7 +18,7 @@ module PlaceOS::Triggers
     def start
       labels = @client.list_labels.data
       stream = labels.try &.includes?("container") ? "container" : "app"
-      query = %({#{stream}="core"} |~ "mod-*" |~ "(?i)exception" | logfmt | level = "[E]")
+      query = %({#{stream}="core"} |~ "mod-*" |~ "(?i)exception" | level =~ "ERROR|[E]")
 
       Tasker.every(@repeat_interval) do
         Log.debug { "Searching Loki for runtime error logs of all running modules" }
