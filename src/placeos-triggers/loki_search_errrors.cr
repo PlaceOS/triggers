@@ -9,6 +9,7 @@ module PlaceOS::Triggers
 
     def initialize(@repeat_interval : Time::Span)
       @client = Loki::Client.from_env
+      @search_window = Triggers.extract_time_span(LOKI_SEARCH_WINDOW)
     end
 
     def self.new(interval : String)
@@ -22,30 +23,72 @@ module PlaceOS::Triggers
 
       Tasker.every(@repeat_interval) do
         Log.debug { "Searching Loki for runtime error logs of all running modules" }
-        PlaceOS::Model::Module.where(running: true).each do |mod|
-          Log.debug { {message: "Searching Loki for module errors", module: mod.id, driver: mod.driver_id} }
-          begin
-            errors = Array(Tuple(String, String)).new
-            result = @client.query_range(query, 1000, Time.utc - 24.hour, Time.utc, Loki::Direction::Backward)
-            result.response_data.result.as(Loki::Model::Streams).each do |resp_stream|
-              map = resp_stream.labels.map
-              errors << {map["source"], map["time"]}
-            end
-            if errors.empty?
-              Log.info { "No module runtime errors found. Skipping..." }
-              next
-            end
 
-            errors = errors.uniq { |v| v[0] }
-            errors.each do |mod_id, time|
-              err_time = Time::Format::RFC_3339.parse(time)
-              PlaceOS::Model::Module.update(mod_id, {has_runtime_error: true, error_timestamp: err_time})
+        begin
+          # Query Loki once for all modules
+          result = @client.query_range(query, 1000, Time.utc - @search_window, Time.utc, Loki::Direction::Backward)
+
+          # Build a map of module_id => latest error timestamp
+          module_errors = Hash(String, Time).new
+          result.response_data.result.as(Loki::Model::Streams).each do |resp_stream|
+            map = resp_stream.labels.map
+
+            # Nil-safe extraction
+            mod_id = map["source"]?
+            time_str = map["time"]?
+
+            next unless mod_id && time_str
+
+            begin
+              err_time = Time::Format::RFC_3339.parse(time_str)
+              # Keep only the latest error per module
+              if !module_errors.has_key?(mod_id) || err_time > module_errors[mod_id]
+                module_errors[mod_id] = err_time
+              end
             rescue ex
-              Log.error(exception: ex) { {message: "Exception received when updating module", module: mod_id, timestamp: time} }
+              Log.error(exception: ex) { {message: "Failed to parse timestamp", module: mod_id, timestamp: time_str} }
             end
-          rescue ex
-            Log.error(exception: ex) { "Exception received" }
           end
+
+          if module_errors.empty?
+            Log.info { "No module runtime errors found. Skipping..." }
+            next
+          end
+
+          Log.debug { {message: "Found errors for modules", count: module_errors.size} }
+
+          # Get all running module IDs for validation
+          running_module_ids = PlaceOS::Model::Module.where(running: true).pluck(:id).to_set
+
+          # Filter to only running modules
+          updates = module_errors.select { |mod_id, _| running_module_ids.includes?(mod_id) }
+
+          if updates.empty?
+            Log.info { "No running modules with errors to update. Skipping..." }
+            next
+          end
+
+          # Bulk update using UNNEST - single database query
+          mod_ids = updates.keys
+          timestamps = updates.values
+
+          sql = <<-SQL
+            UPDATE #{PlaceOS::Model::Module.table_name}
+            SET has_runtime_error = true,
+                error_timestamp = data.timestamp
+            FROM (
+              SELECT UNNEST($1::text[]) AS id,
+                     UNNEST($2::timestamptz[]) AS timestamp
+            ) AS data
+            WHERE #{PlaceOS::Model::Module.table_name}.id = data.id
+          SQL
+
+          PgORM::Database.connection do |db|
+            db.exec(sql, mod_ids, timestamps)
+          end
+          Log.info { {message: "Bulk updated modules with runtime errors", count: updates.size} }
+        rescue ex
+          Log.error(exception: ex) { "Exception received while searching Loki" }
         end
       end
     end
