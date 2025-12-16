@@ -1,4 +1,8 @@
-## Unreleased
+## v1.18.1 (2025-12-16)
+
+### Refactor
+
+- [PPT-2325] optimize loki search trigger ([#51](https://github.com/PlaceOS/triggers/pull/51))
 
 ## v1.18.0 (2025-10-22)
 
