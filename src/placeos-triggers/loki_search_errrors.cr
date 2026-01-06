@@ -33,20 +33,18 @@ module PlaceOS::Triggers
           result.response_data.result.as(Loki::Model::Streams).each do |resp_stream|
             map = resp_stream.labels.map
 
-            # Nil-safe extraction
+            # Extract module ID from stream labels
             mod_id = map["source"]?
-            time_str = map["time"]?
+            next unless mod_id
 
-            next unless mod_id && time_str
-
-            begin
-              err_time = Time::Format::RFC_3339.parse(time_str)
-              # Keep only the latest error per module
-              if !module_errors.has_key?(mod_id) || err_time > module_errors[mod_id]
-                module_errors[mod_id] = err_time
+            # Iterate through entries to find the latest error timestamp
+            resp_stream.entries.each do |entry|
+              if err_time = entry.timestamp
+                # Keep only the latest error per module
+                if !module_errors.has_key?(mod_id) || err_time > module_errors[mod_id]
+                  module_errors[mod_id] = err_time
+                end
               end
-            rescue ex
-              Log.error(exception: ex) { {message: "Failed to parse timestamp", module: mod_id, timestamp: time_str} }
             end
           end
 
