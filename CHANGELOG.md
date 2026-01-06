@@ -1,3 +1,9 @@
+## v1.18.2 (2026-01-06)
+
+### Refactor
+
+- **loki_search_errors**: [PPT-2344] extract timestamp from entry object instead of stream labels ([#52](https://github.com/PlaceOS/triggers/pull/52))
+
 ## v1.18.1 (2025-12-16)
 
 ### Refactor
