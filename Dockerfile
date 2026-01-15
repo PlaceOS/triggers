@@ -52,6 +52,9 @@ RUN for binary in "/usr/bin/git" /app/bin/* /usr/libexec/git-core/*; do \
 RUN git config --system http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
 RUN mkdir /repositories && chown -R appuser /repositories
 
+# Create tmp directory with proper permissions
+RUN rm -rf /tmp && mkdir -p /tmp && chmod 1777 /tmp
+
 # Build a minimal docker image
 FROM scratch
 WORKDIR /
@@ -82,6 +85,16 @@ COPY --from=build /usr/bin/git /git
 COPY --from=build /usr/share/git-core/ /usr/share/git-core/
 COPY --from=build /usr/libexec/git-core/ /usr/libexec/git-core/
 COPY --chown=appuser:appuser --from=build /repositories /repositories
+
+# Copy tmp directory
+COPY --from=build /tmp /tmp
+
+# chmod for setting permissions on /tmp
+COPY --from=build /bin /bin
+COPY --from=build /lib/ld-musl-* /lib/
+RUN chmod -R a+rwX /tmp
+# hadolint ignore=SC2114,DL3059
+RUN rm -rf /bin /lib
 
 # Use an unprivileged user.
 USER appuser:appuser
