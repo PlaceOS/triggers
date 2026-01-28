@@ -18,11 +18,12 @@ module PlaceOS::Triggers
   DEFAULT_HOST          = ENV["SG_SERVER_HOST"]? || "127.0.0.1"
   DEFAULT_PROCESS_COUNT = (ENV["SG_PROCESS_COUNT"]? || 1).to_i
 
-  SMTP_SERVER = ENV["SMTP_SERVER"]? || "smtp.example.com"
-  SMTP_PORT   = (ENV["SMTP_PORT"]? || 25).to_i
-  SMTP_USER   = ENV["SMTP_USER"]? || ""
-  SMTP_PASS   = ENV["SMTP_PASS"]? || ""
-  SMTP_SECURE = ENV["SMTP_SECURE"]? || ""
+  SMTP_SERVER     = ENV["SMTP_SERVER"]? || "smtp.example.com"
+  SMTP_PORT       = (ENV["SMTP_PORT"]? || 25).to_i
+  SMTP_USER       = ENV["SMTP_USER"]? || ""
+  SMTP_PASS       = ENV["SMTP_PASS"]? || ""
+  SMTP_SECURE     = ENV["SMTP_SECURE"]? || ""
+  SMTP_FROM_EMAIL = ENV["SMTP_FROM_EMAIL"]? || "triggers@example.com"
 
   PULSE_ENABLED              = self.boolean_environment("PLACE_PULSE_ENABLED")
   PLACE_DOMAIN               = ENV["PLACE_DOMAIN"]?.presence

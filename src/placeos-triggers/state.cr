@@ -234,11 +234,10 @@ module PlaceOS::Triggers
           client.start do
             trigger.actions.mailers.each do |mail|
               mail.emails.each do |address|
-                # TODO:: Complete subject and from addresses
                 email = EMail::Message.new
-                email.from "triggers@example.com"
+                email.from SMTP_FROM_EMAIL
                 email.to address
-                email.subject "triggered"
+                email.subject trigger.name
                 email.message mail.content
 
                 send(email)
