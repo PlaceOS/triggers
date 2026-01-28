@@ -1,3 +1,9 @@
+## v1.18.3 (2026-01-28)
+
+### Fix
+
+- **state**: trigger email name
+
 ## v1.18.2 (2026-01-06)
 
 ### Refactor
