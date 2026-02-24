@@ -1,3 +1,9 @@
+## v1.19.0 (2026-02-24)
+
+### Feat
+
+- **Dockerfile**: switch to static build
+
 ## v1.18.3 (2026-01-28)
 
 ### Fix
