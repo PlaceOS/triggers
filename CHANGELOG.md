@@ -1,3 +1,9 @@
+## v1.19.1 (2026-03-24)
+
+### Fix
+
+- **trigger_instance_resource**: enforce instance enabled
+
 ## v1.19.0 (2026-02-24)
 
 ### Feat
