@@ -254,5 +254,81 @@ module PlaceOS::Triggers
       trig_cf.stop
       trigi_cf.stop
     end
+
+    it "does not fire disabled trigger instances" do
+      # Trigger state for the system
+      mappings = PlaceOS::Triggers.mapping
+
+      trig_cf = Triggers.trigger_resource
+      trigi_cf = Triggers.trigger_instance_resource
+      trig_cf.start
+      trigi_cf.start
+
+      sleep 100.milliseconds
+
+      trigger = Model::Generator.trigger
+
+      compare = Model::Trigger::Conditions::Comparison.new(
+        left: true,
+        operator: :and,
+        right: Model::Trigger::Conditions::Comparison::StatusVariable.new(
+          mod: "Test_1",
+          status: "state",
+          keys: ["on"],
+        )
+      )
+      trigger.conditions.try &.comparisons = [compare]
+      trigger.valid?.should be_true
+      trigger.save!
+
+      # Create a disabled trigger instance
+      inst = Model::Generator.trigger_instance(trigger)
+      inst.enabled = false
+      inst.save!
+
+      # create the status lookup structure
+      sys_id = inst.control_system_id.not_nil!
+      storage = PlaceOS::Driver::RedisStorage.new(sys_id, "system")
+      storage["Test/1"] = module_id
+
+      PlaceOS::Driver::Subscriptions.new_redis.publish "lookup-change", sys_id
+
+      sleep 100.milliseconds
+
+      # Disabled trigger instance should not be tracked
+      state = mappings.state_for?(inst)
+      state.should be_nil
+
+      # Set the condition that would normally trigger
+      store[:state] = {on: true}.to_json
+
+      sleep 100.milliseconds
+
+      # Should still not be tracked (no state object created)
+      mappings.state_for?(inst).should be_nil
+
+      # Now enable the trigger instance
+      inst.enabled = true
+      inst.save!
+
+      sleep 100.milliseconds
+
+      # Now it should be tracked
+      state = mappings.state_for?(inst)
+      state.should_not be_nil
+      state.not_nil!.triggered?.should be_true
+
+      # Disable it again
+      inst.enabled = false
+      inst.save!
+
+      sleep 100.milliseconds
+
+      # Should be removed from tracking
+      mappings.state_for?(inst).should be_nil
+
+      trig_cf.stop
+      trigi_cf.stop
+    end
   end
 end
