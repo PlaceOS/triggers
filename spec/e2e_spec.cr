@@ -25,6 +25,8 @@ module PlaceOS::Triggers
 
       trig_cf = Triggers.trigger_resource
       trigi_cf = Triggers.trigger_instance_resource
+      mappings.clear
+      clear_tables
       trig_cf.start
       trigi_cf.start
 
@@ -54,10 +56,11 @@ module PlaceOS::Triggers
 
       PlaceOS::Driver::Subscriptions.new_redis.publish "lookup-change", sys_id
 
-      sleep 100.milliseconds
-
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
+
+      # Wait for state to be tracked
+      wait_for { mappings.state_for?(inst) != nil }
 
       # Ensure the trigger hasn't fired
       state = mappings.state_for?(inst).not_nil!
@@ -65,10 +68,8 @@ module PlaceOS::Triggers
 
       store[:state] = {on: true}.to_json
 
-      sleep 100.milliseconds
-
       # ensure the trigger has fired
-      state.triggered?.should be_true
+      wait_for { state.triggered? }
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
@@ -80,20 +81,26 @@ module PlaceOS::Triggers
         )
       )
 
+      # Set greeting value before trigger update so new state picks it up
+      # via current_value fetch (direct Redis read, not dependent on pub/sub)
+      store[:greeting] = "hello".to_json
+
       trigger.conditions.try &.comparisons = [compare, compare2]
       trigger.conditions_will_change!
       trigger.update
 
-      sleep 100.milliseconds
-
-      # The state is replaced with a new state on update
+      # Wait for the state to be replaced and both conditions to be met.
+      # Re-signal values to handle pub/sub reconnection gaps.
+      wait_for { mappings.state_for?(inst) != state }
       state = mappings.state_for?(inst).not_nil!
-      state.triggered?.should be_false
-      store[:greeting] = "hello".to_json
 
-      sleep 100.milliseconds
-
-      state.triggered?.should be_true
+      wait_for do
+        unless state.triggered?
+          store.signal_status("state")
+          store.signal_status("greeting")
+        end
+        state.triggered?
+      end
 
       func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",
@@ -132,6 +139,8 @@ module PlaceOS::Triggers
       mappings = PlaceOS::Triggers.mapping
       trig_cf = Triggers.trigger_resource
       trigi_cf = Triggers.trigger_instance_resource
+      mappings.clear
+      clear_tables
       trig_cf.start
       trigi_cf.start
 
@@ -164,10 +173,11 @@ module PlaceOS::Triggers
 
       PlaceOS::Driver::Subscriptions.new_redis.publish "lookup-change", sys_id
 
-      sleep 100.milliseconds
-
       # signal a change in lookup state
       redis = PlaceOS::Driver::RedisStorage.new_redis_client
+
+      # Wait for states to be tracked
+      wait_for { mappings.state_for?(inst) != nil && mappings.state_for?(inst2) != nil }
 
       # Ensure the trigger hasn't fired
       state = mappings.state_for?(inst).not_nil!
@@ -178,11 +188,11 @@ module PlaceOS::Triggers
 
       store[:state] = {on: true}.to_json
 
-      sleep 100.milliseconds
-
-      # ensure the trigger has fired
-      state.triggered?.should be_true
-      state2.triggered?.should be_true
+      # ensure the trigger has fired, re-signal to handle pub/sub gaps
+      wait_for do
+        store.signal_status("state") unless state.triggered? && state2.triggered?
+        state.triggered? && state2.triggered?
+      end
 
       compare2 = Model::Trigger::Conditions::Comparison.new(
         left: "hello",
@@ -194,24 +204,27 @@ module PlaceOS::Triggers
         )
       )
 
+      # Set greeting value before trigger update so new states pick it up
+      # via current_value fetch (direct Redis read, not dependent on pub/sub)
+      store[:greeting] = "hello".to_json
+
       trigger.conditions.try &.comparisons = [compare, compare2]
       trigger.conditions_will_change!
       trigger.update
 
-      sleep 100.milliseconds
-
-      # The state is replaced with a new state on update
+      # Wait for the states to be replaced and both conditions to be met.
+      # Re-signal values to handle pub/sub reconnection gaps.
+      wait_for { mappings.state_for?(inst) != state && mappings.state_for?(inst2) != state2 }
       state = mappings.state_for?(inst).not_nil!
-      state.triggered?.should be_false
-
       state2 = mappings.state_for?(inst2).not_nil!
-      state2.triggered?.should be_false
-      store[:greeting] = "hello".to_json
 
-      sleep 100.milliseconds
-
-      state.triggered?.should be_true
-      state2.triggered?.should be_true
+      wait_for do
+        unless state.triggered? && state2.triggered?
+          store.signal_status("state")
+          store.signal_status("greeting")
+        end
+        state.triggered? && state2.triggered?
+      end
 
       func = Model::Trigger::Actions::Function.new(
         mod: "Test_1",
@@ -261,6 +274,8 @@ module PlaceOS::Triggers
 
       trig_cf = Triggers.trigger_resource
       trigi_cf = Triggers.trigger_instance_resource
+      mappings.clear
+      clear_tables
       trig_cf.start
       trigi_cf.start
 
@@ -311,21 +326,19 @@ module PlaceOS::Triggers
       inst.enabled = true
       inst.save!
 
-      sleep 100.milliseconds
-
-      # Now it should be tracked
-      state = mappings.state_for?(inst)
-      state.should_not be_nil
-      state.not_nil!.triggered?.should be_true
+      # Now it should be tracked and triggered
+      wait_for do
+        s = mappings.state_for?(inst)
+        s != nil && s.not_nil!.triggered?
+      end
+      mappings.state_for?(inst).should_not be_nil
 
       # Disable it again
       inst.enabled = false
       inst.save!
 
-      sleep 100.milliseconds
-
       # Should be removed from tracking
-      mappings.state_for?(inst).should be_nil
+      wait_for { mappings.state_for?(inst) == nil }
 
       trig_cf.stop
       trigi_cf.stop

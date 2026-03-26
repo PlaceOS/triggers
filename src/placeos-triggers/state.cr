@@ -67,44 +67,57 @@ module PlaceOS::Triggers
       subscriptions.terminate
     end
 
+    # monitor should not fail.
+    # we need to continue binding until we have success
     def monitor!
-      return if @terminated
+      SimpleRetry.try_to(
+        base_interval: 1.second,
+        max_interval: 1.minute
+      ) do |run_count, last_error|
+        return if @terminated
+        if last_error
+          Log.error(exception: last_error) { {
+            system_id: instance.control_system_id,
+            trigger:   instance.trigger_id,
+            instance:  instance.id,
+            message:   "failed to initialize trigger instance '#{trigger.name}'",
+          } }
 
-      # Build the time triggers
-      trigger.conditions.time_dependents.each_with_index do |time, index|
-        condition_key = "time_#{index}"
-        conditions_met[condition_key] = false
-
-        case time.type
-        in .at?   then time_at(condition_key, time.time)
-        in .cron? then time_cron(condition_key, time.cron, time.timezone)
+          terminate!
+          @terminated = false
+          @subscriptions = nil
+          comparisons.clear
         end
+
+        # Build the time triggers
+        trigger.conditions.time_dependents.each_with_index do |time, index|
+          condition_key = "time_#{index}"
+          conditions_met[condition_key] = false
+
+          case time.type
+          in .at?   then time_at(condition_key, time.time)
+          in .cron? then time_cron(condition_key, time.cron, time.timezone)
+          end
+        end
+
+        # Monitor status values to track conditions
+        system_id = instance.control_system_id.as(String)
+        trigger.conditions.comparisons.each_with_index do |comparison, index|
+          condition_key = "comparison_#{index}"
+          conditions_met[condition_key] = false
+
+          self.comparisons << Comparison.new(
+            self,
+            condition_key,
+            system_id,
+            comparison.left,
+            comparison.operator,
+            comparison.right
+          )
+        end
+
+        self.comparisons.each(&.bind!(subscriptions))
       end
-
-      # Monitor status values to track conditions
-      system_id = instance.control_system_id.not_nil!
-      trigger.conditions.comparisons.each_with_index do |comparison, index|
-        condition_key = "comparison_#{index}"
-        conditions_met[condition_key] = false
-
-        self.comparisons << Comparison.new(
-          self,
-          condition_key,
-          system_id,
-          comparison.left,
-          comparison.operator,
-          comparison.right
-        )
-      end
-
-      self.comparisons.each(&.bind!(subscriptions))
-    rescue error
-      Log.error(exception: error) { {
-        system_id: instance.control_system_id,
-        trigger:   instance.trigger_id,
-        instance:  instance.id,
-        message:   "failed to initialize trigger instance '#{trigger.name}'",
-      } }
     end
 
     def set_condition(key : String, state : Bool)

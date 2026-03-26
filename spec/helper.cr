@@ -63,3 +63,14 @@ module PlaceOS::Api::SpecClient
 end
 
 include PlaceOS::Api::SpecClient
+
+# Poll until a condition is met, yielding between checks.
+# Raises on timeout so spec failures point to the caller.
+def wait_for(timeout : Time::Span = 5.seconds, interval : Time::Span = 50.milliseconds, &condition : -> Bool)
+  deadline = Time.instant + timeout
+  loop do
+    return if condition.call
+    raise "wait_for timed out after #{timeout}" if Time.instant >= deadline
+    sleep interval
+  end
+end
