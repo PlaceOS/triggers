@@ -1,3 +1,9 @@
+## v1.20.0 (2026-03-26)
+
+### Feat
+
+- ensure state is in sync on load
+
 ## v1.19.1 (2026-03-24)
 
 ### Fix
