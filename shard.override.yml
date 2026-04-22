@@ -19,6 +19,3 @@ dependencies:
 
   ulid:
     github: place-labs/ulid
-
-  redis:
-    github: stefanwille/crystal-redis
