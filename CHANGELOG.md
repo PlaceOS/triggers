@@ -1,3 +1,9 @@
+## v1.21.0 (2026-05-08)
+
+### Feat
+
+- reduce memory requirements on boot
+
 ## v1.20.0 (2026-03-26)
 
 ### Feat
