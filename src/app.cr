@@ -91,7 +91,12 @@ module PlaceOS::Triggers
   self.trigger_instance_resource.start
 
   # Ensure all enabled trigger instances were loaded during startup
-  self.mapping.reconcile
+  spawn do
+    loop do
+      self.mapping.reconcile
+      sleep 20.minutes
+    end
+  end
 
   # Start telemetry
   PlaceOS::Triggers.start_pulse

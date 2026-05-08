@@ -270,12 +270,12 @@ module PlaceOS::Triggers
     end
 
     def time_at(key, time)
-      condition_timers << Tasker.at(time.not_nil!) { temporary_condition_met(key) }
+      condition_timers << Tasker.at(time.not_nil!) { spawn { temporary_condition_met(key) } }
     end
 
     def time_cron(key, cron, timezone)
       location = timezone ? Time::Location.load(timezone) : Time::Location.local
-      condition_timers << Tasker.cron(cron.not_nil!, location) { temporary_condition_met(key) }
+      condition_timers << Tasker.cron(cron.not_nil!, location) { spawn { temporary_condition_met(key) } }
     end
 
     def temporary_condition_met(key : String)

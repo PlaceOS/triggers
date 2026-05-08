@@ -8,6 +8,9 @@ module PlaceOS::Triggers
     # used to check service is responding
     @[AC::Route::GET("/")]
     def healthcheck : Nil
+      Log.context.set(
+        triggers: PlaceOS::Triggers.mapping.loaded_count.to_s
+      )
       raise "not healthy" unless self.class.healthcheck?
     end
 

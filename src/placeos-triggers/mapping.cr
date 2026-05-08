@@ -92,25 +92,70 @@ module PlaceOS::Triggers
       end
     end
 
+    def loaded_count
+      mapping_lock.synchronize { trigger_instance_state.size }
+    end
+
+    RECONCILE_BATCH_SIZE = 200
+
     # Reconcile loaded trigger instances against the database.
-    # Any enabled instances missing from the mapping are loaded.
+    # Any enabled instances missing from the mapping are loaded; any loaded
+    # instances no longer enabled are removed.
+    #
+    # Walks the enabled set in created_at order one batch at a time so the
+    # set of loaded ids we hold in memory is the only working set, and it
+    # only ever shrinks: ids the DB confirms as enabled are removed as we
+    # see them, ids missing from the mapping are loaded inline, and anything
+    # left at the end is stale and torn down.
     def reconcile : Nil
       mapping_lock.synchronize do
-        expected_ids = Model::TriggerInstance.where(enabled: true).ids.map(&.as(String)).to_set
+        expected = Model::TriggerInstance.where(enabled: true).count
+        loaded = trigger_instance_state.size
+        return if expected == loaded
+
         loaded_ids = trigger_instance_state.keys.to_set
+        initial_loaded = loaded_ids.size
+        missing_count = 0
 
-        missing = expected_ids - loaded_ids
-        extra = loaded_ids - expected_ids
+        last_created_at = nil.as(Time?)
+        last_id = nil.as(String?)
 
-        if missing.empty? && extra.empty?
-          Log.info { "startup reconciliation: all #{expected_ids.size} enabled trigger instances loaded" }
-          return
+        loop do
+          query = Model::TriggerInstance.where(enabled: true)
+          if last_created_at && last_id
+            # composite cursor (created_at, id) keeps pagination stable when
+            # multiple records share a created_at value
+            query = query.where(
+              "(created_at, id) > (?, ?)",
+              last_created_at, last_id
+            )
+          end
+
+          page = query.order(:created_at, :id).limit(RECONCILE_BATCH_SIZE).to_a
+          page.each do |instance|
+            id = instance.id.as(String)
+            last_created_at = instance.created_at
+            last_id = id
+
+            # if it's already loaded, drop it from the working set; if not,
+            # load it now using the record we just fetched
+            unless loaded_ids.delete(id)
+              begin
+                Log.info { "reconciliation loading missing instance #{id}" }
+                add_instance(instance)
+                missing_count += 1
+              rescue error
+                Log.error(exception: error) { "reconciliation failed to load instance #{id}" }
+              end
+            end
+          end
+
+          break if page.size < RECONCILE_BATCH_SIZE
         end
 
-        Log.warn { "startup reconciliation: #{missing.size} missing, #{extra.size} extra instances detected" }
-
-        # Remove instances that are no longer enabled
-        extra.each do |id|
+        # Anything still in loaded_ids was not in the enabled set: stale
+        extra_count = loaded_ids.size
+        loaded_ids.each do |id|
           Log.info { "reconciliation removing extra instance #{id}" }
           trigger_instance_state.delete(id).try do |state|
             trigger_state[state.instance.trigger_id]?.try &.delete(state)
@@ -118,20 +163,14 @@ module PlaceOS::Triggers
           end
         end
 
-        # Load missing instances
-        missing.each do |id|
-          begin
-            instance = Model::TriggerInstance.find!(id)
-            next unless instance.enabled
-            Log.info { "reconciliation loading missing instance #{id}" }
-            add_instance(instance)
-          rescue error
-            Log.error(exception: error) { "reconciliation failed to load instance #{id}" }
-          end
+        if missing_count > 0 || extra_count > 0
+          Log.warn { "reconciliation: loaded #{missing_count} missing, removed #{extra_count} extra (was #{initial_loaded}, now #{trigger_instance_state.size})" }
+        else
+          Log.info { "reconciliation: no changes (#{initial_loaded} instances loaded)" }
         end
-
-        Log.info { "startup reconciliation complete: #{trigger_instance_state.size} instances now loaded" }
       end
+    rescue error
+      Log.error(exception: error) { "failed to reconcile loaded triggers" }
     end
   end
 end
