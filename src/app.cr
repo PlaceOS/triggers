@@ -93,7 +93,7 @@ module PlaceOS::Triggers
   # Ensure all enabled trigger instances were loaded during startup
   spawn do
     loop do
-      self.mapping.reconcile
+      PlaceOS::Triggers.mapping.reconcile
       sleep 20.minutes
     end
   end
