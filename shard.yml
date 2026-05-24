@@ -50,6 +50,7 @@ dependencies:
   # Timers / Scheduling
   tasker:
     github: spider-gazelle/tasker
+    version: "~> 3.0"
 
   git-repository:
     github: place-labs/git-repository
