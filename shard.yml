@@ -31,7 +31,7 @@ dependencies:
   # Models
   placeos-models:
     github: placeos/models
-    version: ~> 9.20
+    version: ">= 9.92.1"
 
   # Log Backend
   placeos-log-backend:
