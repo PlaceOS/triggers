@@ -1,3 +1,9 @@
+## v1.22.0 (2026-06-09)
+
+### Feat
+
+- [PPT-2525] Update crystal build for unwind support ([#53](https://github.com/PlaceOS/triggers/pull/53))
+
 ## v1.21.1 (2026-05-08)
 
 ### Fix
