@@ -58,6 +58,9 @@ dependencies:
   loki-client:
     github: spider-gazelle/crystal-loki-client
 
+  dns:
+    github: spider-gazelle/dns
+
 development_dependencies:
   ameba:
     github: crystal-ameba/ameba

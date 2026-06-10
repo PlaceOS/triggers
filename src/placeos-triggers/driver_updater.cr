@@ -6,8 +6,6 @@ module PlaceOS::Triggers
   class DriverUpdate
     Log = ::Log.for(self)
 
-    class_getter repository_dir : String = File.expand_path("./repositories")
-
     def initialize(@repeat_interval : Time::Span)
     end
 
@@ -19,41 +17,34 @@ module PlaceOS::Triggers
       Tasker.every(@repeat_interval) do
         installed_drivers = PlaceOS::Model::Driver.all.reload
         Log.info { "Finding if updates are available for #{installed_drivers.size} installed drivers" }
-        installed_drivers.each do |driver|
-          Log.debug { {message: "Looking for driver updates", driver: driver.id, commit: driver.commit} }
+        installed_drivers.group_by(&.repository_id).each_value do |drivers|
+          repo = nil
           begin
-            folder = fetch_repo(driver.repository.not_nil!)
-            info = last_commit(folder, driver.file_name)
-            Log.debug { {message: "Retrieved latest commit for driver", driver: driver.id, previous_commit: driver.commit, latest_commit: info.commit} }
-            driver.process_update_info(info)
+            current_repo = drivers.first.repository.not_nil!
+            password = current_repo.decrypt_password if current_repo.password.presence
+            # providing the branch caches the repository history in a temp folder
+            # for the lifetime of this object
+            repo = GitRepository.new(current_repo.uri, current_repo.username, password, branch: current_repo.branch)
+
+            drivers.each do |driver|
+              Log.debug { {message: "Looking for driver updates", driver: driver.id, commit: driver.commit} }
+              begin
+                last = repo.commits(current_repo.branch, driver.file_name, depth: 1).first
+                info = Model::Driver::UpdateInfo.new(last.commit, last.subject, last.author, last.date)
+                Log.debug { {message: "Retrieved latest commit for driver", driver: driver.id, previous_commit: driver.commit, latest_commit: info.commit} }
+                driver.process_update_info(info)
+              rescue ex
+                Log.error(exception: ex) { "failed to check for updates: #{driver.id}" }
+              end
+            end
           rescue ex
-            Log.error(exception: ex) { "Exception received" }
+            Log.error(exception: ex) { "failed to obtain repository details: #{drivers.first.repository_id}" }
+          ensure
+            # remove the cached history now, rather than waiting for the GC to finalize
+            repo.try { |cached| cached.cleanup(cached.cache_path) }
           end
         end
       end
-    end
-
-    private def last_commit(folder, filename)
-      git = GitRepository::Commands.new(folder)
-      last = git.commits(filename, 1).first
-      Model::Driver::UpdateInfo.new(last.commit, last.subject, last.author, last.date)
-    end
-
-    private def fetch_repo(current_repo)
-      folder = Path.new(self.class.repository_dir, current_repo.id.as(String), current_repo.folder_name)
-      downloaded = Dir.exists?(folder)
-      Dir.mkdir_p(folder) unless downloaded
-      password = current_repo.decrypt_password if current_repo.password.presence
-      repo = GitRepository.new(current_repo.uri, current_repo.username, password)
-      git = GitRepository::Commands.new(folder.to_s)
-      unless downloaded
-        git.init
-        git.add_origin repo.repository
-      end
-      git.run_git("fetch", {"--all"})
-      git.checkout current_repo.branch rescue git.checkout repo.default_branch
-
-      folder.to_s
     end
   end
 end

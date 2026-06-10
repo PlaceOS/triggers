@@ -59,7 +59,6 @@ RUN for binary in "/usr/bin/git" /app/bin/* /usr/libexec/git-core/*; do \
     done
 
 RUN git config --system http.sslCAInfo /etc/ssl/certs/ca-certificates.crt
-RUN mkdir /repositories && chown -R appuser /repositories
 
 # Create tmp directory with proper permissions
 RUN rm -rf /tmp && mkdir -p /tmp && chmod 1777 /tmp
@@ -85,16 +84,6 @@ ENV GIT_SSL_CAINFO=/etc/ssl/certs/ca-certificates.crt
 # This is required for Timezone support
 COPY --from=build /usr/share/zoneinfo/ /usr/share/zoneinfo/
 
-# Copy the app into place
-COPY --from=build /app/deps /
-COPY --from=build /app/bin /
-
-# git for querying remote repositories
-COPY --from=build /usr/bin/git /git
-COPY --from=build /usr/share/git-core/ /usr/share/git-core/
-COPY --from=build /usr/libexec/git-core/ /usr/libexec/git-core/
-COPY --chown=appuser:appuser --from=build /repositories /repositories
-
 # Copy tmp directory
 COPY --from=build /tmp /tmp
 
@@ -104,6 +93,15 @@ COPY --from=build /lib/ld-musl-* /lib/
 RUN chmod -R a+rwX /tmp
 # hadolint ignore=SC2114,DL3059
 RUN rm -rf /bin /lib
+
+# git for querying remote repositories
+COPY --from=build /usr/bin/git /git
+COPY --from=build /usr/share/git-core/ /usr/share/git-core/
+COPY --from=build /usr/libexec/git-core/ /usr/libexec/git-core/
+
+# Copy the app into place
+COPY --from=build /app/deps /
+COPY --from=build /app/bin /
 
 # Use an unprivileged user.
 USER appuser:appuser
