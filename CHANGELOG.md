@@ -1,4 +1,8 @@
-## Unreleased
+## v1.23.0 (2026-06-10)
+
+### Feat
+
+- **driver_updater**: reduce CPU load
 
 ## v1.22.0 (2026-06-09)
 
