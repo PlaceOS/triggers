@@ -11,7 +11,7 @@ shards:
 
   active-model:
     git: https://github.com/spider-gazelle/active-model.git
-    version: 4.7.1
+    version: 4.7.2
 
   ameba:
     git: https://github.com/crystal-ameba/ameba.git
@@ -127,7 +127,7 @@ shards:
 
   json-schema:
     git: https://github.com/spider-gazelle/json-schema.git
-    version: 2.1.1
+    version: 2.1.2
 
   jwt:
     git: https://github.com/crystal-community/jwt.git
@@ -195,7 +195,7 @@ shards:
 
   placeos-models:
     git: https://github.com/placeos/models.git
-    version: 9.123.4
+    version: 9.123.6
 
   placeos-pulse: # Overridden
     git: https://github.com/placeos/pulse.git
